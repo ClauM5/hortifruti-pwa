@@ -1,0 +1,54 @@
+/* Arquivo: frontend/src/components/Cart.css */
+.cart-container {
+    position: fixed;
+    top: 20%;
+    right: 20px;
+    width: 350px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    padding: 20px;
+    z-index: 1000;
+    border: 1px solid #eee;
+}
+.cart-container h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cart-item-controls button {
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+.remove-button {
+    border: none;
+    background: none;
+    color: #f44336;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+.cart-total {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #333;
+    text-align: right;
+    font-size: 1.2rem;
+}
