@@ -51,7 +51,7 @@ function App() {
             <div className="card-content">
               <h2 className="product-name">{produto.nome}</h2>
               <p className="product-price">
-                R$ {produto.preco.toFixed(2).replace('.', ',')} / {produto.unidade}
+              R$ {Number(produto.preco).toFixed(2).replace('.', ',')} / {produto.unidade}
               </p>
               <button className="add-to-cart-button">Adicionar ao Carrinho</button>
             </div>
