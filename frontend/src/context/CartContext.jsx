@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/context/CartContext.jsx (Versão Otimizada)
+// Arquivo: frontend/src/context/CartContext.jsx (Final com clearCart)
 
 import React, { createContext, useState, useContext, useCallback, useMemo } from 'react';
 
@@ -7,8 +7,6 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
 
-  // A função addToCart só será recriada se suas dependências mudarem.
-  // Como não tem dependências, ela é criada uma única vez.
   const addToCart = useCallback((product) => {
     setCartItems(prevItems => {
       const itemExists = prevItems.find(item => item.id === product.id);
@@ -24,12 +22,10 @@ export function CartProvider({ children }) {
     });
   }, []);
 
-  // A função removeFromCart também é criada uma única vez.
   const removeFromCart = useCallback((productId) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   }, []);
   
-  // A função updateQuantity só será recriada se a função removeFromCart mudar (o que nunca acontece).
   const updateQuantity = useCallback((productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
@@ -41,15 +37,20 @@ export function CartProvider({ children }) {
       );
     }
   }, [removeFromCart]);
+
+  // >>>>> NOVA FUNÇÃO <<<<<
+  // Simplesmente define o array de itens do carrinho como um array vazio.
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+  }, []);
   
-  // O objeto 'value' só será recriado se uma das suas dependências mudar.
-  // Isso estabiliza o contexto e previne re-renderizações desnecessárias nos componentes consumidores.
   const value = useMemo(() => ({
     cartItems,
     addToCart,
     removeFromCart,
     updateQuantity,
-  }), [cartItems, addToCart, removeFromCart, updateQuantity]);
+    clearCart, // <-- Adiciona a nova função ao nosso "quadro de avisos"
+  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

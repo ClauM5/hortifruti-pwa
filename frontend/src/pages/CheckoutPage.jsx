@@ -1,6 +1,6 @@
-// Arquivo: frontend/src/pages/CheckoutPage.jsx
+// Arquivo: frontend/src/pages/CheckoutPage.jsx (Final com clearCart)
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import './CheckoutPage.css';
@@ -8,7 +8,8 @@ import './CheckoutPage.css';
 const API_PEDIDOS_URL = 'https://hortifruti-backend.onrender.com/api/pedidos';
 
 function CheckoutPage() {
-  const { cartItems, addToCart, removeFromCart, updateQuantity } = useCart(); // Adicionamos as funções do carrinho para limpar depois
+  // 1. Puxamos a nova função clearCart do nosso hook
+  const { cartItems, clearCart } = useCart(); 
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -50,8 +51,7 @@ function CheckoutPage() {
 
       const result = await response.json();
       setPedidoSucesso(result.pedidoId);
-      // Limpar o carrinho - aqui vamos precisar de uma nova função no context
-      // Por enquanto, vamos apenas mostrar a mensagem de sucesso
+      clearCart(); // <-- 2. CHAMAMOS A FUNÇÃO AQUI! O carrinho é limpo após o sucesso.
       
     } catch (err) {
       setError(err.message);
@@ -60,19 +60,31 @@ function CheckoutPage() {
     }
   };
   
-  // Se o pedido foi um sucesso, mostra uma mensagem de agradecimento
+  // Quando o pedido for um sucesso, redireciona para a home após 5 segundos
+  useEffect(() => {
+    if(pedidoSucesso) {
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 5000); // 5000 milissegundos = 5 segundos
+      
+      // Limpa o timer se o componente for desmontado
+      return () => clearTimeout(timer);
+    }
+  }, [pedidoSucesso, navigate]);
+  
   if (pedidoSucesso) {
     return (
       <div className="checkout-container success-message">
         <h2>Obrigado pelo seu pedido!</h2>
         <p>Seu pedido nº <strong>{pedidoSucesso}</strong> foi recebido com sucesso.</p>
-        <p>Em breve você receberá atualizações sobre a entrega.</p>
-        <button onClick={() => navigate('/')} className="primary-button">Voltar para a Loja</button>
+        <p>Você será redirecionado para a loja em 5 segundos.</p>
+        <button onClick={() => navigate('/')} className="primary-button">Voltar para a Loja Agora</button>
       </div>
     );
   }
 
   return (
+    // ... O resto do JSX do formulário continua exatamente o mesmo ...
     <div className="checkout-container">
       <h2>Finalizar Pedido</h2>
       
@@ -92,27 +104,10 @@ function CheckoutPage() {
       <form onSubmit={handleSubmit} className="checkout-form">
         <h3>Seus Dados</h3>
         <label htmlFor="nome_cliente">Nome Completo</label>
-        <input
-          type="text"
-          id="nome_cliente"
-          name="nome_cliente"
-          value={formData.nome_cliente}
-          onChange={handleInputChange}
-          required
-        />
-        
+        <input type="text" id="nome_cliente" name="nome_cliente" value={formData.nome_cliente} onChange={handleInputChange} required/>
         <label htmlFor="endereco_cliente">Endereço de Entrega</label>
-        <textarea
-          id="endereco_cliente"
-          name="endereco_cliente"
-          value={formData.endereco_cliente}
-          onChange={handleInputChange}
-          required
-          rows="4"
-        />
-
+        <textarea id="endereco_cliente" name="endereco_cliente" value={formData.endereco_cliente} onChange={handleInputChange} required rows="4"/>
         {error && <p className="error-message">{error}</p>}
-        
         <button type="submit" disabled={isLoading || cartItems.length === 0} className="primary-button">
           {isLoading ? 'Enviando Pedido...' : 'Finalizar Pedido'}
         </button>
