@@ -1,39 +1,121 @@
-/* Arquivo: frontend/src/pages/AdminPage.css */
+/* Arquivo: frontend/src/pages/AdminPage.css (Versão Final) */
 .admin-login-container, .admin-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px 40px;
+    background: #fdfdfd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.admin-login-container h2, .admin-container h2 {
-  margin-top: 0;
-  color: #333;
+.admin-login-container {
+    text-align: center;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.admin-header h2 {
+    margin: 0;
+    color: #333;
 }
 
 .admin-input {
-  width: 80%;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+    width: 80%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.admin-form {
+    margin-bottom: 40px;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.admin-form h3 {
+    margin-top: 0;
+}
+
+.admin-form input {
+    display: block;
+    width: calc(100% - 24px);
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.item-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 .admin-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.admin-button.logout-button {
+    background-color: #f44336;
+}
+
+.admin-button.save-button {
+    background-color: #2196F3;
+}
+
+.admin-button.clear-button, .admin-button.edit-button {
+    background-color: #ff9800;
+}
+
+.admin-button.delete-button {
+    background-color: #795548;
 }
 
 .admin-button:hover {
-  background-color: #45a049;
+    opacity: 0.9;
+}
+
+.error-message {
+    color: #f44336;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
