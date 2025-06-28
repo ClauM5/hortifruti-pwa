@@ -1,52 +1,88 @@
-// Arquivo: backend/index.js (Versão 3 - Com CRUD)
+// Arquivo: backend/index.js (Versão 4 - Com Upload de Imagem)
 
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+// NOVOS IMPORTS
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 
 const app = express();
 app.use(cors());
-// NOVO: Middleware para o Express entender JSON no corpo das requisições
 app.use(express.json());
 
+// --- CONFIGURAÇÕES ---
 const PORT = process.env.PORT || 3001;
 
-// Configuração da conexão com o banco de dados
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
-// --- ROTAS PÚBLICAS (qualquer um pode acessar) ---
+// NOVA CONFIGURAÇÃO: Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Rota para LER (Read) todos os produtos
+// NOVA CONFIGURAÇÃO: Multer
+// Vamos configurar o multer para guardar o arquivo em memória temporariamente
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// --- MIDDLEWARE DE AUTENTICAÇÃO ---
+const checkPassword = (req, res, next) => {
+  // ... (código do checkPassword continua o mesmo)
+  const { authorization } = req.headers;
+  if (authorization === process.env.ADMIN_PASSWORD) {
+    next();
+  } else {
+    res.status(403).send('Acesso negado: senha incorreta.');
+  }
+};
+
+// --- ROTAS ---
+
+// Rota para LER todos os produtos (pública)
 app.get('/api/produtos', async (req, res) => {
+  // ... (código da rota GET continua o mesmo)
   try {
     const result = await pool.query('SELECT * FROM produtos ORDER BY id ASC');
     res.json(result.rows);
   } catch (err) {
-    console.error('Erro ao buscar produtos', err);
     res.status(500).send('Erro no servidor');
   }
 });
 
-// --- MIDDLEWARE DE AUTENTICAÇÃO (nosso "segurança") ---
-// Este é um "porteiro" que vai verificar a senha antes de deixar a pessoa acessar as rotas de admin
-const checkPassword = (req, res, next) => {
-  const { authorization } = req.headers; // Pega a senha do cabeçalho da requisição
-  if (authorization === process.env.ADMIN_PASSWORD) {
-    next(); // Senha correta, pode prosseguir!
-  } else {
-    res.status(403).send('Acesso negado: senha incorreta.'); // Senha incorreta, barra a entrada.
+// NOVA ROTA: Upload de imagem (protegida)
+// Usa o multer como middleware para pegar um único arquivo chamado 'image'
+app.post('/api/upload', checkPassword, upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('Nenhum arquivo enviado.');
   }
-};
 
-// --- ROTAS PROTEGIDAS (só para o admin) ---
+  // Converte o buffer do arquivo para um formato que o Cloudinary entende
+  const b64 = Buffer.from(req.file.buffer).toString("base64");
+  let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
 
-// Rota para CRIAR (Create) um novo produto
+  try {
+    // Envia o arquivo para o Cloudinary
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: "hortifruti-pwa" // Opcional: cria uma pasta no Cloudinary para organizar
+    });
+    // Devolve a URL segura da imagem
+    res.status(200).json({ imageUrl: result.secure_url });
+  } catch (error) {
+    console.error("Erro no upload para o Cloudinary:", error);
+    res.status(500).send('Erro ao fazer upload da imagem.');
+  }
+});
+
+
+// Rotas CRUD de produtos (protegidas)
 app.post('/api/produtos', checkPassword, async (req, res) => {
+  // ... (código da rota POST continua o mesmo)
   const { nome, preco, unidade, imagem } = req.body;
   try {
     const newProduct = await pool.query(
@@ -55,13 +91,12 @@ app.post('/api/produtos', checkPassword, async (req, res) => {
     );
     res.status(201).json(newProduct.rows[0]);
   } catch (err) {
-    console.error('Erro ao criar produto', err);
     res.status(500).send('Erro no servidor');
   }
 });
 
-// Rota para ATUALIZAR (Update) um produto existente
 app.put('/api/produtos/:id', checkPassword, async (req, res) => {
+  // ... (código da rota PUT continua o mesmo)
   const { id } = req.params;
   const { nome, preco, unidade, imagem } = req.body;
   try {
@@ -71,23 +106,22 @@ app.put('/api/produtos/:id', checkPassword, async (req, res) => {
     );
     res.json(updatedProduct.rows[0]);
   } catch (err) {
-    console.error('Erro ao atualizar produto', err);
     res.status(500).send('Erro no servidor');
   }
 });
 
-// Rota para DELETAR (Delete) um produto
 app.delete('/api/produtos/:id', checkPassword, async (req, res) => {
+  // ... (código da rota DELETE continua o mesmo)
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM produtos WHERE id = $1', [id]);
-    res.status(204).send(); // 204 significa "sucesso, sem conteúdo para devolver"
+    res.status(204).send();
   } catch (err) {
-    console.error('Erro ao deletar produto', err);
     res.status(500).send('Erro no servidor');
   }
 });
 
+// --- INICIALIZAÇÃO DO SERVIDOR ---
 app.listen(PORT, () => {
   console.log(`Servidor do Hortifruti rodando na porta ${PORT}`);
 });
