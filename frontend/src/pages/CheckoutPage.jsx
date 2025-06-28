@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/CheckoutPage.jsx (Versão Final com Pagamento)
+// Arquivo: frontend/src/pages/CheckoutPage.jsx (Versão 100% Completa e Corrigida)
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import './CheckoutPage.css';
 
 const API_PEDIDOS_URL = 'https://hortifruti-backend.onrender.com/api/pedidos';
-const SUA_CHAVE_PIX = "claudioalves153@gmail.com"; // <-- VAMOS TROCAR ISSO PELA SUA CHAVE REAL
+const SUA_CHAVE_PIX = "sua-chave-pix-aqui"; // Lembre-se de colocar sua chave real aqui
 
 function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
@@ -17,7 +17,6 @@ function CheckoutPage() {
     endereco_cliente: '',
   });
 
-  // Novos estados para o pagamento
   const [metodoPagamento, setMetodoPagamento] = useState('');
   const [trocoPara, setTrocoPara] = useState('');
   
@@ -34,14 +33,19 @@ function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (!formData.nome_cliente.trim() || !formData.endereco_cliente.trim()) {
+      setError('Por favor, preencha seu nome e endereço.');
+      return;
+    }
     if (!metodoPagamento) {
       setError('Por favor, selecione uma forma de pagamento.');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-
+    
     const pedido = {
       ...formData,
       itens: cartItems,
@@ -55,7 +59,9 @@ function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pedido),
       });
-      if (!response.ok) throw new Error('Houve um problema ao finalizar seu pedido.');
+      if (!response.ok) {
+        throw new Error('Houve um problema ao finalizar seu pedido. Verifique os dados e tente novamente.');
+      }
       const result = await response.json();
       setPedidoSucesso(result.pedidoId);
       clearCart();
@@ -91,15 +97,31 @@ function CheckoutPage() {
     );
   }
 
+  // A PARTE ABAIXO ESTAVA FALTANDO NO CÓDIGO ANTERIOR
   return (
     <div className="checkout-container">
       <h2>Finalizar Pedido</h2>
+      
       <div className="order-summary">
-        {/* ... Resumo do pedido continua o mesmo ... */}
+        <h3>Resumo do Pedido</h3>
+        {cartItems.map(item => (
+          <div key={item.id} className="summary-item">
+            <span>{item.quantity}x {item.nome}</span>
+            <span>R$ {(Number(item.preco) * item.quantity).toFixed(2).replace('.', ',')}</span>
+          </div>
+        ))}
+        <div className="summary-total">
+          <strong>Total: R$ {total.toFixed(2).replace('.', ',')}</strong>
+        </div>
       </div>
+
       <form onSubmit={handleSubmit} className="checkout-form">
         <h3>Seus Dados</h3>
-        {/* ... Campos de nome e endereço continuam os mesmos ... */}
+        <label htmlFor="nome_cliente">Nome Completo</label>
+        <input type="text" id="nome_cliente" name="nome_cliente" value={formData.nome_cliente} onChange={handleInputChange} required/>
+        
+        <label htmlFor="endereco_cliente">Endereço de Entrega</label>
+        <textarea id="endereco_cliente" name="endereco_cliente" value={formData.endereco_cliente} onChange={handleInputChange} required rows="4"/>
 
         <h3>Forma de Pagamento</h3>
         <div className="payment-options">
@@ -107,8 +129,6 @@ function CheckoutPage() {
           <label><input type="radio" name="payment" value="Pix" onChange={(e) => setMetodoPagamento(e.target.value)} /> Pix</label>
           <label><input type="radio" name="payment" value="Dinheiro" onChange={(e) => setMetodoPagamento(e.target.value)} /> Dinheiro</label>
         </div>
-
-        {metodoPagamento === 'Pix' && <div className="pix-info"><h4>Nossa chave Pix:</h4><p className="pix-key">{SUA_CHAVE_PIX}</p></div>}
         
         {metodoPagamento === 'Dinheiro' && (
           <div className="troco-info">
