@@ -86,3 +86,9 @@
 .success-message h2 {
     color: #4CAF50;
 }
+/* Estilos para as opções de pagamento */
+.payment-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.payment-options label { font-weight: normal; }
+.pix-info { background: #e0f2f1; border: 1px solid #b2dfdb; padding: 15px; border-radius: 4px; margin-top: 15px; }
+.pix-key { font-weight: bold; font-size: 1.1rem; user-select: all; }
+.troco-info { margin-top: 15px; }
