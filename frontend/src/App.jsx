@@ -1,14 +1,16 @@
-// Arquivo: frontend/src/App.jsx (Atualizado com o CartProvider)
+// Arquivo: frontend/src/App.jsx (Versão Final com CartProvider)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
-import { CartProvider } from './context/CartContext'; // <-- 1. Importe o provider
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
-    <CartProvider> {/* <-- 2. Envolva tudo com ele */}
+    // O CartProvider abraça o Router para que todas as rotas/páginas
+    // tenham acesso ao estado do carrinho de compras.
+    <CartProvider>
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />

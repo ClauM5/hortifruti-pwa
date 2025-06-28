@@ -1,4 +1,5 @@
 // Arquivo: frontend/src/components/Cart.jsx
+
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import './Cart.css';
