@@ -154,7 +154,7 @@ function AdminPage() {
 
   const handleLogin = () => {
     // Lembre-se de usar a sua senha aqui!
-    if (senha === 'senhaforte123') {
+    if (senha === '102030') {
       setIsLoggedIn(true);
     } else {
       alert('Senha incorreta!');
