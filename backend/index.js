@@ -1,38 +1,49 @@
-// Arquivo: backend/index.js
+// Arquivo: backend/index.js (Versão 2 - com Banco de Dados)
 
-// 1. Importando as ferramentas que instalamos
 const express = require('express');
 const cors = require('cors');
+// 1. Importando a nova biblioteca do PostgreSQL
+const { Pool } = require('pg');
 
-// 2. Inicializando o express
 const app = express();
-
-// 3. Configurando o CORS para permitir acesso do nosso frontend
 app.use(cors());
 
-// 4. Definindo a porta em que o servidor vai rodar
-//    process.env.PORT é uma variável que o Render (nosso hospedeiro) usará.
-//    Localmente, ele usará a porta 3001.
 const PORT = process.env.PORT || 3001;
 
-// 5. Nossos dados "fake" por enquanto. Na próxima fase, isso virá do banco de dados.
-const produtos = [
-  { id: 1, nome: 'Banana Prata', preco: 7.99, unidade: 'kg', imagem: 'https://i.imgur.com/kS5t3a6.png' },
-  { id: 2, nome: 'Alface Crespa', preco: 3.50, unidade: 'un', imagem: 'https://i.imgur.com/v82rYSt.png' },
-  { id: 3, nome: 'Tomate Italiano', preco: 8.90, unidade: 'kg', imagem: 'https://i.imgur.com/r8mB1BS.png' },
-  { id: 4, nome: 'Maçã Fuji', preco: 9.99, unidade: 'kg', imagem: 'https://i.imgur.com/dJk9o4V.png' },
-  { id: 5, nome: 'Cenoura', preco: 4.50, unidade: 'kg', imagem: 'https://i.imgur.com/Y3U22hb.png' },
-  { id: 6, nome: 'Abacate', preco: 6.00, unidade: 'un', imagem: 'https://i.imgur.com/8zOpJk5.png' }
-];
-
-// 6. Criando nossa primeira "rota" (endpoint) da API
-//    Quando o frontend chamar o endereço "/api/produtos", este código será executado.
-app.get('/api/produtos', (req, res) => {
-  // Ele simplesmente devolve a nossa lista de produtos no formato JSON
-  res.json(produtos);
+// 2. Configurando a conexão com o banco de dados
+//    Ele vai automaticamente usar a variável de ambiente DATABASE_URL que criamos no Render.
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-// 7. Comando final para ligar o servidor e deixá-lo "escutando" por requisições
+// 3. Rota de teste para verificar a conexão com o banco de dados
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    res.status(200).send('Conexão com o banco de dados bem-sucedida!');
+    client.release(); // Libera o cliente de volta para o pool de conexões
+  } catch (err) {
+    console.error('Erro ao conectar ao banco de dados', err);
+    res.status(500).send('Falha ao conectar ao banco de dados');
+  }
+});
+
+// 4. Modificando a rota de produtos para buscar do banco de dados
+app.get('/api/produtos', async (req, res) => {
+  try {
+    // O pool.query executa um comando SQL no nosso banco de dados
+    const result = await pool.query('SELECT * FROM produtos');
+    // O resultado da busca fica em result.rows
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Erro ao buscar produtos', err);
+    res.status(500).send('Erro no servidor');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor do Hortifruti rodando na porta ${PORT}`);
 });
