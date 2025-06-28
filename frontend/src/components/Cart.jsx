@@ -1,14 +1,17 @@
-// Arquivo: frontend/src/components/Cart.jsx
+// Arquivo: frontend/src/components/Cart.jsx (Final com botão de Checkout)
 
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom'; // 1. Importe useNavigate
 import './Cart.css';
 
 function Cart() {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const navigate = useNavigate(); // 2. Inicialize o hook
 
   const total = cartItems.reduce((sum, item) => sum + Number(item.preco) * item.quantity, 0);
 
+  // Se o carrinho está vazio, não mostra o botão
   if (cartItems.length === 0) {
     return (
       <div className="cart-container">
@@ -36,6 +39,15 @@ function Cart() {
       <div className="cart-total">
         <strong>Total: R$ {total.toFixed(2).replace('.',',')}</strong>
       </div>
+
+      {/* 3. Adicione o botão de checkout */}
+      <button 
+        className="checkout-button" 
+        onClick={() => navigate('/checkout')}
+      >
+        Finalizar Pedido
+      </button>
+
     </div>
   );
 }
