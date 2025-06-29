@@ -1,0 +1,17 @@
+/* Arquivo: frontend/src/layouts/MainLayout.css */
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Este é o nosso novo container que vai centralizar o conteúdo */
+.page-content {
+    flex-grow: 1;
+    max-width: 1200px;  /* Define uma largura máxima para o conteúdo */
+    width: 100%;
+    margin: 0 auto;     /* Centraliza o container na página */
+    padding: 2rem;      /* Adiciona um respiro/espaçamento nas laterais e no topo/fundo */
+    box-sizing: border-box; /* Garante que o padding não afete a largura total */
+}

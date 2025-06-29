@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/HomePage.jsx (Versão Limpa sem Navbar/Cart)
+// Arquivo: frontend/src/pages/HomePage.jsx (Versão Final e Limpa)
 
 import React, { useState, useEffect } from 'react';
 import '../App.css';
@@ -20,12 +20,12 @@ function HomePage() {
   },[]);
 
   return (
-    <> {/* Usamos um fragmento <> pois o <div className="App"> agora não é mais necessário aqui */}
+    <>
       <header className="App-header">
         <h1>Hortifruti Frescor</h1>
         <p>Peça online, receba em casa!</p>
       </header>
-      <main className="product-grid">
+      <div className="product-grid">
         {loading && <p>Carregando produtos...</p>}
         {produtos.map(produto => (
           <div key={produto.id} className="product-card">
@@ -37,7 +37,7 @@ function HomePage() {
             </div>
           </div>
         ))}
-      </main>
+      </div>
     </>
   );
 }
