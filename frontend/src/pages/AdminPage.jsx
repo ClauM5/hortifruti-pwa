@@ -1,12 +1,14 @@
-// Arquivo: frontend/src/pages/AdminPage.jsx (Com renderização segura)
+// Arquivo: frontend/src/pages/AdminPage.jsx (Com nomes dos produtos nos pedidos)
 
-// ... (todo o início do arquivo até a parte de renderização continua o mesmo)
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './AdminPage.css';
+
+// ... (constantes de URL e a maior parte do código continua igual)
 const API_PRODUTOS_URL = 'https://hortifruti-backend.onrender.com/api/produtos';
 const API_PEDIDOS_URL = 'https://hortifruti-backend.onrender.com/api/pedidos';
 const API_UPLOAD_URL = 'https://hortifruti-backend.onrender.com/api/upload';
 const WS_URL = 'wss://hortifruti-backend.onrender.com';
+
 function AdminPage() {
   const [produtos, setProdutos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
@@ -18,6 +20,7 @@ function AdminPage() {
   const [imagemFile, setImagemFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const notificationSound = useRef(null);
+
   const fetchAdminData = useCallback(async () => { setIsLoading(true); setError(''); try { const headers = { 'authorization': "102030" }; const [produtosResponse, pedidosResponse] = await Promise.all([ fetch(API_PRODUTOS_URL), fetch(API_PEDIDOS_URL, { headers }) ]); if (!produtosResponse.ok || !pedidosResponse.ok) { throw new Error('Falha ao carregar dados do admin.'); } const produtosData = await produtosResponse.json(); const pedidosData = await pedidosResponse.json(); setProdutos(produtosData); setPedidos(pedidosData); } catch (err) { setError(err.message); } finally { setIsLoading(false); } }, []);
   const handleStatusChange = useCallback(async (pedidoId, novoStatus) => { setError(''); try { const response = await fetch(`${API_PEDIDOS_URL}/${pedidoId}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'authorization': "102030" }, body: JSON.stringify({ status: novoStatus }) }); if (!response.ok) throw new Error('Falha ao atualizar status.'); setPedidos(prevPedidos => prevPedidos.map(p => p.id === pedidoId ? { ...p, status: novoStatus } : p)); } catch (err) { setError(err.message); } }, []);
   useEffect(() => { if (!isLoggedIn) return; fetchAdminData(); notificationSound.current = new Audio('/notification.mp3'); const ws = new WebSocket(WS_URL); ws.onopen = () => console.log('Conectado ao servidor WebSocket do admin.'); ws.onmessage = (event) => { const message = JSON.parse(event.data); if (message.type === 'NOVO_PEDIDO') { notificationSound.current.play().catch(e => console.error("Erro ao tocar som:", e)); setPedidos(prevPedidos => [message.payload, ...prevPedidos]); document.title = ">> NOVO PEDIDO! <<"; setTimeout(() => { document.title = "Painel de Admin"; }, 5000); } }; ws.onclose = () => console.log('Desconectado do servidor WebSocket.'); ws.onerror = (error) => console.error('Erro no WebSocket:', error); return () => { ws.close(); }; }, [isLoggedIn, fetchAdminData]);
@@ -30,7 +33,7 @@ function AdminPage() {
   const handleFileChange = (e) => { setImagemFile(e.target.files[0]); };
   const handleLogin = () => { if (senha === "102030") { setIsLoggedIn(true); } else { alert('Senha incorreta!'); } };
   if (!isLoggedIn) { return ( <div className="admin-login-container"> <h2>Painel de Administrador</h2> <input type="password" placeholder="Digite a senha" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} className="admin-input"/> <button onClick={handleLogin} className="admin-button">Entrar</button> </div> ); }
-  
+
   return (
     <div className="admin-container">
       {/* ... (cabeçalho e formulário de produto continuam os mesmos) ... */}
@@ -42,22 +45,41 @@ function AdminPage() {
           {pedidos.length > 0 ? pedidos.map(pedido => (
             <div key={pedido.id} className="order-card">
               <div className="order-card-header">
-                {/* ... */}
+                <h4>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</h4>
+                <div className="order-status-control">
+                  <select value={pedido.status} onChange={(e) => handleStatusChange(pedido.id, e.target.value)}>
+                    <option value="Recebido">Recebido</option>
+                    <option value="Em Preparo">Em Preparo</option>
+                    <option value="Saiu para Entrega">Saiu para Entrega</option>
+                    <option value="Entregue">Entregue</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
+                </div>
               </div>
               <div className="order-card-body">
                 <p><strong>Cliente:</strong> {pedido.nome_cliente}</p>
                 <p><strong>Endereço:</strong> {pedido.endereco_cliente}</p>
                 <p><strong>Itens:</strong></p>
                 <ul>
-                  {/* >>>>> A CORREÇÃO <<<<< */}
-                  {/* Adicionamos "?." (optional chaining) para não quebrar se 'itens' não existir */}
-                  {pedido.itens?.map(item => (
-                    <li key={item.id}>{item.quantidade}x (ID: {item.produto_id}) - R$ {Number(item.preco_unitario).toFixed(2)}</li>
-                  ))}
+                  {/* ======================================================= */}
+                  {/* >> A CORREÇÃO ESTÁ AQUI << */}
+                  {/* ======================================================= */}
+                  {pedido.itens?.map(item => {
+                    // Para cada item, procuramos o produto correspondente na lista de produtos
+                    const produtoInfo = produtos.find(p => p.id === item.produto_id);
+                    const produtoNome = produtoInfo ? produtoInfo.nome : `Produto (ID: ${item.produto_id})`;
+
+                    return (
+                      <li key={item.id}>
+                        {item.quantidade}x **{produtoNome}** - R$ {Number(item.preco_unitario).toFixed(2)}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
               <div className="order-card-footer">
-                {/* ... */}
+                <span><strong>Pagamento:</strong> {pedido.metodo_pagamento} {pedido.metodo_pagamento === 'Dinheiro' ? `(Troco p/ R$ ${Number(pedido.troco_para).toFixed(2)})` : ''}</span>
+                <strong>Total: R$ {Number(pedido.valor_total).toFixed(2)}</strong>
               </div>
             </div>
           )) : <p>Nenhum pedido recebido ainda.</p>}
