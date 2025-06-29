@@ -1,31 +1,32 @@
-// Arquivo: frontend/src/pages/HomePage.jsx (Final com Navbar)
-import React from 'react';
-import Navbar from '../components/Navbar'; // Importa o Navbar
-// ... outras importações ...
-import { useCart } from '../context/CartContext';
-import Cart from '../components/Cart';
+// Arquivo: frontend/src/pages/HomePage.jsx (Versão Limpa sem Navbar/Cart)
+
+import React, { useState, useEffect } from 'react';
 import '../App.css';
+import { useCart } from '../context/CartContext';
 
 const API_URL = 'https://hortifruti-backend.onrender.com/api/produtos';
 
 function HomePage() {
-  // ... toda a lógica de fetchProdutos e addToCart continua a mesma ...
-  const [produtos, setProdutos] = React.useState([]);
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
-
-  React.useEffect(() => {
-    fetch(API_URL).then(r=>r.json()).then(d=>setProdutos(d));
+      
+  useEffect(() => {
+    setLoading(true);
+    fetch(API_URL).then(r=>r.json()).then(d=>{
+        setProdutos(d);
+        setLoading(false);
+    });
   },[]);
 
   return (
-    <div className="App">
-      <Navbar /> {/* <-- Adiciona o Navbar no topo */}
-      <Cart />
+    <> {/* Usamos um fragmento <> pois o <div className="App"> agora não é mais necessário aqui */}
       <header className="App-header">
         <h1>Hortifruti Frescor</h1>
         <p>Peça online, receba em casa!</p>
       </header>
       <main className="product-grid">
+        {loading && <p>Carregando produtos...</p>}
         {produtos.map(produto => (
           <div key={produto.id} className="product-card">
             <img src={produto.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={produto.nome} className="product-image" />
@@ -37,7 +38,8 @@ function HomePage() {
           </div>
         ))}
       </main>
-    </div>
+    </>
   );
 }
+
 export default HomePage;
