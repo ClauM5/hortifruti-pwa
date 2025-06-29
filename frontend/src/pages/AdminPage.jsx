@@ -1,238 +1,139 @@
-// Arquivo: frontend/src/pages/AdminPage.jsx (Versão com Upload)
+// Arquivo: frontend/src/pages/AdminPage.jsx (Versão Final com Gerenciamento de Pedidos)
 
 import React, { useState, useEffect } from 'react';
 import './AdminPage.css';
 
-// URLs da nossa API
 const API_PRODUTOS_URL = 'https://hortifruti-backend.onrender.com/api/produtos';
+const API_PEDIDOS_URL = 'https://hortifruti-backend.onrender.com/api/pedidos'; // URL para listar pedidos
 const API_UPLOAD_URL = 'https://hortifruti-backend.onrender.com/api/upload';
 
 function AdminPage() {
-  // ... (os estados de produtos, senha, isLoggedIn, etc. continuam os mesmos) ...
   const [produtos, setProdutos] = useState([]);
+  const [pedidos, setPedidos] = useState([]); // << NOVO ESTADO para guardar os pedidos
   const [senha, setSenha] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formProduto, setFormProduto] = useState({
-    id: null,
-    nome: '',
-    preco: '',
-    unidade: 'kg',
-    imagem: ''
-  });
-  // NOVO ESTADO: para o arquivo de imagem selecionado
+  const [formProduto, setFormProduto] = useState({ id: null, nome: '', preco: '', unidade: 'kg', imagem: '' });
   const [imagemFile, setImagemFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-
   // --- Funções de API ---
-
-  const fetchProdutos = async () => {
+  
+  const fetchAdminData = async () => {
     setIsLoading(true);
+    setError('');
     try {
-      const response = await fetch(API_PRODUTOS_URL);
-      const data = await response.json();
-      setProdutos(data);
+      const headers = { 'authorization': senha };
+      // Busca produtos e pedidos em paralelo para mais eficiência
+      const [produtosResponse, pedidosResponse] = await Promise.all([
+        fetch(API_PRODUTOS_URL),
+        fetch(API_PEDIDOS_URL, { headers })
+      ]);
+
+      if (!produtosResponse.ok || !pedidosResponse.ok) {
+        throw new Error('Falha ao carregar dados do admin.');
+      }
+      
+      const produtosData = await produtosResponse.json();
+      const pedidosData = await pedidosResponse.json();
+      setProdutos(produtosData);
+      setPedidos(pedidosData);
+
     } catch (err) {
-      setError('Falha ao carregar produtos.');
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // NOVA FUNÇÃO: para fazer o upload da imagem
-  const handleImageUpload = async () => {
-    if (!imagemFile) return null; // Se não tem arquivo, não faz nada
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('image', imagemFile); // 'image' deve ser o mesmo nome que o backend espera no multer
-
-    try {
-      const response = await fetch(API_UPLOAD_URL, {
-        method: 'POST',
-        headers: { 'authorization': senha },
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Falha no upload da imagem.');
-
-      const data = await response.json();
-      return data.imageUrl; // Retorna a URL da imagem do Cloudinary
-    } catch (err) {
-      setError(err.message);
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  // << NOVA FUNÇÃO para atualizar o status do pedido >>
+  const handleStatusChange = async (pedidoId, novoStatus) => {
     setError('');
-
-    // Passo 1: Fazer upload da imagem, se houver uma nova
-    let imageUrl = formProduto.imagem; // Começa com a imagem atual
-    if (imagemFile) {
-      imageUrl = await handleImageUpload();
-      if (!imageUrl) { // Se o upload falhou, para a execução
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    // Passo 2: Preparar os dados para salvar o produto
-    const produtoData = { ...formProduto, imagem: imageUrl };
-    const { id, ...data } = produtoData;
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? `${API_PRODUTOS_URL}/${id}` : API_PRODUTOS_URL;
-
-    // Passo 3: Salvar o produto (criar ou atualizar)
     try {
-      const response = await fetch(url, {
-        method: method,
+      const response = await fetch(`${API_PRODUTOS_URL.replace('/produtos', '/pedidos')}/${pedidoId}/status`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'authorization': senha
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ status: novoStatus })
       });
-
-      if (!response.ok) throw new Error(`Falha ao salvar produto.`);
-
-      clearForm();
-      fetchProdutos();
-
+      if (!response.ok) throw new Error('Falha ao atualizar status.');
+      
+      fetchAdminData(); // Recarrega todos os dados para mostrar a atualização
     } catch (err) {
       setError(err.message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleDelete = async (produtoId) => {
-    // ... (função de deletar continua a mesma) ...
-    if (!window.confirm("Tem certeza que deseja deletar este produto?")) return;
-    setIsLoading(true);
-    try {
-      await fetch(`${API_PRODUTOS_URL}/${produtoId}`, {
-        method: 'DELETE',
-        headers: { 'authorization': senha }
-      });
-      fetchProdutos();
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
-  };
 
-  // --- Funções Auxiliares ---
-
-  const handleEdit = (produto) => {
-    setFormProduto(produto);
-    setImagemFile(null); // Limpa a seleção de arquivo ao editar
-    window.scrollTo(0, 0);
-  };
-
-  const clearForm = () => {
-    setFormProduto({ id: null, nome: '', preco: '', unidade: 'kg', imagem: '' });
-    setImagemFile(null);
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormProduto(prevState => ({ ...prevState, [name]: value }));
-  };
-
-  // NOVA: Função para lidar com a seleção do arquivo
-  const handleFileChange = (e) => {
-    setImagemFile(e.target.files[0]);
-  };
-
-  const handleLogin = () => {
-    // Lembre-se de usar a sua senha aqui!
-    if (senha === '102030') {
-      setIsLoggedIn(true);
-    } else {
-      alert('Senha incorreta!');
-    }
-  };
+  // ... (as funções handleSave, handleDelete, handleEdit, etc. continuam as mesmas)
+    const handleImageUpload = async () => { if (!imagemFile) return null; setIsUploading(true); const formData = new FormData(); formData.append('image', imagemFile); try { const response = await fetch(API_UPLOAD_URL, { method: 'POST', headers: { 'authorization': senha }, body: formData, }); if (!response.ok) throw new Error('Falha no upload da imagem.'); const data = await response.json(); return data.imageUrl; } catch (err) { setError(err.message); return null; } finally { setIsUploading(false); } };
+    const handleSave = async (e) => { e.preventDefault(); setIsLoading(true); setError(''); let imageUrl = formProduto.imagem; if (imagemFile) { imageUrl = await handleImageUpload(); if (!imageUrl) { setIsLoading(false); return; } } const produtoData = { ...formProduto, imagem: imageUrl }; const { id, ...data } = produtoData; const method = id ? 'PUT' : 'POST'; const url = id ? `${API_PRODUTOS_URL}/${id}` : API_PRODUTOS_URL; try { const response = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', 'authorization': senha }, body: JSON.stringify(data) }); if (!response.ok) throw new Error(`Falha ao salvar produto.`); clearForm(); fetchAdminData(); } catch (err) { setError(err.message); } finally { setIsLoading(false); } };
+    const handleDelete = async (produtoId) => { if (!window.confirm("Tem certeza que deseja deletar este produto?")) return; setIsLoading(true); try { await fetch(`${API_PRODUTOS_URL}/${produtoId}`, { method: 'DELETE', headers: { 'authorization': senha } }); fetchAdminData(); } catch (err) { setError(err.message) } finally { setIsLoading(false) } };
+    const handleEdit = (produto) => { setFormProduto(produto); setImagemFile(null); window.scrollTo(0, 0); };
+    const clearForm = () => { setFormProduto({ id: null, nome: '', preco: '', unidade: 'kg', imagem: '' }); setImagemFile(null); };
+    const handleFormChange = (e) => { const { name, value } = e.target; setFormProduto(prevState => ({ ...prevState, [name]: value })); };
+    const handleFileChange = (e) => { setImagemFile(e.target.files[0]); };
+    const handleLogin = () => { if (senha === 'senhaforte123') { setIsLoggedIn(true); } else { alert('Senha incorreta!'); } };
 
   useEffect(() => {
     if (isLoggedIn) {
-      fetchProdutos();
+      fetchAdminData(); // Agora busca tanto produtos quanto pedidos
     }
   }, [isLoggedIn]);
 
   // --- RENDERIZAÇÃO ---
   if (!isLoggedIn) {
-    // ... (código da tela de login continua o mesmo) ...
-    return (
-        <div className="admin-login-container">
-          <h2>Painel de Administrador</h2>
-          <input
-            type="password"
-            placeholder="Digite a senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            className="admin-input"
-          />
-          <button onClick={handleLogin} className="admin-button">Entrar</button>
-        </div>
-      );
+    return ( <div className="admin-login-container"> <h2>Painel de Administrador</h2> <input type="password" placeholder="Digite a senha" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} className="admin-input"/> <button onClick={handleLogin} className="admin-button">Entrar</button> </div> );
   }
 
   return (
     <div className="admin-container">
-      <div className="admin-header">
-        <h2>Gerenciar Produtos</h2>
-        <button onClick={() => setIsLoggedIn(false)} className="admin-button logout-button">Sair</button>
-      </div>
-
+      <div className="admin-header"> <h2>Gerenciar Produtos e Pedidos</h2> <button onClick={() => setIsLoggedIn(false)} className="admin-button logout-button">Sair</button> </div>
       {error && <p className="error-message">{error}</p>}
-      {(isLoading || isUploading) && <p>{isUploading ? 'Enviando imagem...' : 'Carregando...'}</p>}
+      {isLoading && <p>Carregando...</p>}
+      <form onSubmit={handleSave} className="admin-form"> {/* ... (Formulário de produtos continua o mesmo) ... */}  <h3>{formProduto.id ? 'Editando Produto' : 'Adicionar Novo Produto'}</h3> <input type="text" name="nome" placeholder="Nome do Produto" value={formProduto.nome} onChange={handleFormChange} required /> <input type="number" name="preco" placeholder="Preço (ex: 7.99)" value={formProduto.preco} onChange={handleFormChange} required step="0.01" /> <input type="text" name="unidade" placeholder="Unidade (kg, un, etc)" value={formProduto.unidade} onChange={handleFormChange} required /> <label htmlFor="imagem-upload">Imagem do Produto:</label> <input id="imagem-upload" type="file" name="imagem" onChange={handleFileChange} accept="image/*" /> {(formProduto.imagem || imagemFile) && ( <div className="image-preview"> <p>Pré-visualização:</p> <img src={imagemFile ? URL.createObjectURL(imagemFile) : formProduto.imagem} alt="Preview" /> </div> )} <div className="form-buttons"> <button type="submit" className="admin-button save-button" disabled={isUploading}> {isUploading ? 'Enviando...' : 'Salvar'} </button> {formProduto.id && <button type="button" onClick={clearForm} className="admin-button clear-button">Cancelar Edição</button>} </div> </form>
+      <div className="product-list"> {/* ... (Lista de produtos para edição continua a mesma) ... */} {produtos.map(p => ( <div key={p.id} className="product-item"> <img src={p.imagem || 'https://via.placeholder.com/50'} alt={p.nome} className="item-thumbnail" /> <span>{p.nome} - R$ {Number(p.preco).toFixed(2)}</span> <div className="item-buttons"> <button onClick={() => handleEdit(p)} className="admin-button edit-button">Editar</button> <button onClick={() => handleDelete(p.id)} className="admin-button delete-button">Deletar</button> </div> </div> ))} </div>
 
-      <form onSubmit={handleSave} className="admin-form">
-        <h3>{formProduto.id ? 'Editando Produto' : 'Adicionar Novo Produto'}</h3>
-        <input type="text" name="nome" placeholder="Nome do Produto" value={formProduto.nome} onChange={handleFormChange} required />
-        <input type="number" name="preco" placeholder="Preço (ex: 7.99)" value={formProduto.preco} onChange={handleFormChange} required step="0.01" />
-        <input type="text" name="unidade" placeholder="Unidade (kg, un, etc)" value={formProduto.unidade} onChange={handleFormChange} required />
-
-        {/* NOVO CAMPO DE UPLOAD */}
-        <label htmlFor="imagem-upload">Imagem do Produto:</label>
-        <input id="imagem-upload" type="file" name="imagem" onChange={handleFileChange} accept="image/*" />
-
-        {/* Exibe a imagem atual ou a pré-visualização da nova */}
-        {(formProduto.imagem || imagemFile) && (
-          <div className="image-preview">
-            <p>Pré-visualização:</p>
-            <img src={imagemFile ? URL.createObjectURL(imagemFile) : formProduto.imagem} alt="Preview" />
-          </div>
-        )}
-
-        <div className="form-buttons">
-          <button type="submit" className="admin-button save-button" disabled={isUploading}>
-            {isUploading ? 'Enviando...' : 'Salvar'}
-          </button>
-          {formProduto.id && <button type="button" onClick={clearForm} className="admin-button clear-button">Cancelar Edição</button>}
-        </div>
-      </form>
-
-      <div className="product-list">
-        {produtos.map(p => (
-          <div key={p.id} className="product-item">
-            <img src={p.imagem || 'https://via.placeholder.com/50'} alt={p.nome} className="item-thumbnail" />
-            <span>{p.nome} - R$ {Number(p.preco).toFixed(2)}</span>
-            <div className="item-buttons">
-              <button onClick={() => handleEdit(p)} className="admin-button edit-button">Editar</button>
-              <button onClick={() => handleDelete(p.id)} className="admin-button delete-button">Deletar</button>
+      {/* ======================================================= */}
+      {/* >> NOVA SEÇÃO DE GERENCIAMENTO DE PEDIDOS << */}
+      {/* ======================================================= */}
+      <div className="order-management-section">
+        <h2>Pedidos Recebidos</h2>
+        <div className="order-list">
+          {pedidos.length > 0 ? pedidos.map(pedido => (
+            <div key={pedido.id} className="order-card">
+              <div className="order-card-header">
+                <h4>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</h4>
+                <div className="order-status-control">
+                  <select value={pedido.status} onChange={(e) => handleStatusChange(pedido.id, e.target.value)}>
+                    <option value="Recebido">Recebido</option>
+                    <option value="Em Preparo">Em Preparo</option>
+                    <option value="Saiu para Entrega">Saiu para Entrega</option>
+                    <option value="Entregue">Entregue</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
+                </div>
+              </div>
+              <div className="order-card-body">
+                <p><strong>Cliente:</strong> {pedido.nome_cliente}</p>
+                <p><strong>Endereço:</strong> {pedido.endereco_cliente}</p>
+                <p><strong>Itens:</strong></p>
+                <ul>
+                  {pedido.itens.map(item => (
+                    <li key={item.id}>{item.quantidade}x (ID: {item.produto_id}) - R$ {Number(item.preco_unitario).toFixed(2)}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="order-card-footer">
+                <span><strong>Pagamento:</strong> {pedido.metodo_pagamento} {pedido.metodo_pagamento === 'Dinheiro' ? `(Troco p/ R$ ${Number(pedido.troco_para).toFixed(2)})` : ''}</span>
+                <strong>Total: R$ {Number(pedido.valor_total).toFixed(2)}</strong>
+              </div>
             </div>
-          </div>
-        ))}
+          )) : <p>Nenhum pedido recebido ainda.</p>}
+        </div>
       </div>
     </div>
   );
