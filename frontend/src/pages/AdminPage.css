@@ -1,15 +1,17 @@
-/* Arquivo: frontend/src/pages/AdminPage.css (Com estilos de categoria) */
+/* Arquivo: frontend/src/pages/AdminPage.css (Com estilos de banner) */
 
-/* ... (estilos antigos de .admin-container, .admin-header, etc. continuam os mesmos) ... */
+/* ... (estilos antigos de .admin-container, etc. continuam os mesmos) ... */
 .admin-login-container, .admin-container { max-width: 900px; margin: 40px auto; padding: 20px 40px; background: #fdfdfd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .admin-login-container { text-align: center; }
 .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
 .admin-header h2 { margin: 0; color: #333; }
 .admin-input { width: 80%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-.admin-form { margin-bottom: 40px; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-.admin-form h3 { margin-top: 0; }
-.admin-form input:not([type="checkbox"]) { display: block; width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-.form-buttons { display: flex; gap: 10px; }
+.admin-form { margin-bottom: 20px; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #fff; }
+.admin-form h3, .admin-form h4 { margin-top: 0; }
+.admin-form input:not([type="checkbox"]), .admin-form input[type="file"] { display: block; width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+.admin-form label { display: block; margin-bottom: 15px; font-weight: normal; text-align: left; }
+.admin-form label input[type="checkbox"] { margin-right: 10px; }
+.form-buttons { display: flex; gap: 10px; margin-top: 10px; }
 .product-list { display: flex; flex-direction: column; gap: 15px; }
 .product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee; }
 .item-buttons { display: flex; gap: 10px; }
@@ -20,12 +22,10 @@
 .admin-button.delete-button { background-color: #795548; }
 .admin-button:hover { opacity: 0.9; }
 .error-message { color: #f44336; font-weight: bold; margin-bottom: 15px; }
-.admin-form label { display: block; margin-top: 20px; margin-bottom: 5px; font-weight: bold; text-align: left; }
-.admin-form input[type="file"] { border: none; padding: 0; }
 .image-preview { margin-top: 15px; text-align: left; }
 .image-preview img { max-width: 150px; max-height: 150px; border-radius: 4px; border: 1px solid #ddd; }
 .item-thumbnail { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; margin-right: 15px; }
-.order-management-section { margin-top: 50px; padding-top: 30px; border-top: 2px solid #eee; }
+.order-management-section { margin-top: 20px; }
 .order-list { display: flex; flex-direction: column; gap: 20px; }
 .order-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
 .order-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 15px; }
@@ -33,83 +33,49 @@
 .order-status-control select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; }
 .order-card-body ul { list-style-type: none; padding-left: 15px; }
 .order-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #f0f0f0; font-size: 1rem; }
-
+.category-manager { margin-bottom: 20px; padding: 20px; border: 1px solid #eee; border-radius: 8px; background: #f9f9f9; }
+.category-manager h3 { margin-top: 0; }
+.category-form { display: flex; gap: 10px; margin-bottom: 20px; }
+.category-form input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+.category-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.category-item { display: flex; align-items: center; gap: 8px; background-color: #e0e0e0; padding: 5px 10px; border-radius: 15px; font-size: 0.9rem; }
+.delete-button-small { background-color: #9e9e9e; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.category-checkboxes { margin-top: 15px; padding: 15px; border: 1px solid #eee; border-radius: 4px; }
+.category-checkboxes label { display: inline-flex; align-items: center; margin-right: 20px; font-weight: normal; margin-top: 0; }
+.category-checkboxes input[type="checkbox"] { margin-right: 8px; }
 
 /* ======================================================= */
-/* >> NOVOS ESTILOS PARA GERENCIADOR DE CATEGORIAS << */
+/* >> NOVOS ESTILOS PARA SEÇÕES E GERENCIADOR DE BANNERS << */
 /* ======================================================= */
-.category-manager {
-    margin-bottom: 40px;
-    padding: 20px;
-    border: 1px solid #eee;
-    border-radius: 8px;
+.admin-section {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid #ddd;
+}
+
+.banner-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.banner-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
     background: #f9f9f9;
-}
-
-.category-manager h3 {
-    margin-top: 0;
-}
-
-.category-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.category-form input {
-    flex-grow: 1;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.category-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.category-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #e0e0e0;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.9rem;
-}
-
-.delete-button-small {
-    background-color: #9e9e9e;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.category-checkboxes {
-    margin-top: 15px;
-    padding: 15px;
     border: 1px solid #eee;
     border-radius: 4px;
 }
 
-.category-checkboxes label {
-    display: inline-flex; /* Altera para inline-flex */
-    align-items: center;
-    margin-right: 20px;
-    font-weight: normal;
-    margin-top: 0;
+.status-active {
+    color: #4CAF50;
+    font-weight: bold;
 }
 
-.category-checkboxes input[type="checkbox"] {
-    margin-right: 8px;
+.status-inactive {
+    color: #9e9e9e;
 }
