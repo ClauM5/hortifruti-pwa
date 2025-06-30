@@ -1,6 +1,6 @@
-/* Arquivo: frontend/src/pages/AdminPage.css (Com estilos de banner) */
+/* Arquivo: frontend/src/pages/AdminPage.css (Com estilos de cupom) */
 
-/* ... (estilos antigos de .admin-container, etc. continuam os mesmos) ... */
+/* ... (todos os estilos antigos continuam os mesmos) ... */
 .admin-login-container, .admin-container { max-width: 900px; margin: 40px auto; padding: 20px 40px; background: #fdfdfd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .admin-login-container { text-align: center; }
 .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
@@ -8,12 +8,12 @@
 .admin-input { width: 80%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
 .admin-form { margin-bottom: 20px; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #fff; }
 .admin-form h3, .admin-form h4 { margin-top: 0; }
-.admin-form input:not([type="checkbox"]), .admin-form input[type="file"] { display: block; width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+.admin-form input:not([type="checkbox"]), .admin-form input[type="file"], .admin-form select { display: block; width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
 .admin-form label { display: block; margin-bottom: 15px; font-weight: normal; text-align: left; }
 .admin-form label input[type="checkbox"] { margin-right: 10px; }
 .form-buttons { display: flex; gap: 10px; margin-top: 10px; }
-.product-list { display: flex; flex-direction: column; gap: 15px; }
-.product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee; }
+.product-list, .banner-list, .coupon-list { display: flex; flex-direction: column; gap: 15px; }
+.product-item, .banner-item, .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
 .item-buttons { display: flex; gap: 10px; }
 .admin-button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: background-color 0.2s, opacity 0.2s; }
 .admin-button.logout-button { background-color: #f44336; }
@@ -43,39 +43,19 @@
 .category-checkboxes { margin-top: 15px; padding: 15px; border: 1px solid #eee; border-radius: 4px; }
 .category-checkboxes label { display: inline-flex; align-items: center; margin-right: 20px; font-weight: normal; margin-top: 0; }
 .category-checkboxes input[type="checkbox"] { margin-right: 8px; }
+.admin-section { margin-top: 40px; padding-top: 30px; border-top: 2px solid #ddd; }
+.banner-list { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.banner-item { display: grid; grid-template-columns: auto 1fr auto auto; gap: 15px; align-items: center; padding: 10px; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; }
+.status-active { color: #4CAF50; font-weight: bold; }
+.status-inactive { color: #9e9e9e; }
 
 /* ======================================================= */
-/* >> NOVOS ESTILOS PARA SEÇÕES E GERENCIADOR DE BANNERS << */
+/* >> NOVOS ESTILOS PARA GERENCIADOR DE CUPONS << */
 /* ======================================================= */
-.admin-section {
-  margin-top: 40px;
-  padding-top: 30px;
-  border-top: 2px solid #ddd;
+.list-item {
+    grid-template-columns: 1fr 1fr 1fr auto;
 }
 
-.banner-list {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.banner-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    gap: 15px;
-    align-items: center;
-    padding: 10px;
-    background: #f9f9f9;
-    border: 1px solid #eee;
-    border-radius: 4px;
-}
-
-.status-active {
-    color: #4CAF50;
-    font-weight: bold;
-}
-
-.status-inactive {
-    color: #9e9e9e;
+.list-item > span {
+    font-family: monospace;
 }
