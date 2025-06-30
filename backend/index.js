@@ -1,4 +1,4 @@
-// Arquivo: backend/index.js (Versão 15 - Com API de Banners)
+// Arquivo: backend/index.js (Versão 16 - Com API de Endereços)
 
 const express = require('express');
 const cors = require('cors');
@@ -26,7 +26,7 @@ const verifyToken = (req, res, next) => { const authHeader = req.headers['author
 
 
 // --- ROTAS (a maioria sem alterações) ---
-// ... (Todas as rotas de produtos, auth, pedidos, categorias, favoritos, etc., continuam aqui)
+// ... (Todas as rotas de produtos, auth, pedidos, categorias, favoritos, banners, etc., continuam aqui)
 app.get('/api/produtos', async (req, res) => { const { search, categoria } = req.query; const authHeader = req.headers['authorization']; const token = authHeader && authHeader.split(' ')[1]; let userId = null; if (token) { try { const decoded = jwt.verify(token, process.env.JWT_SECRET); userId = decoded.id; } catch (e) { /* Token inválido, ignora */ } } let query = ` SELECT p.*, array_agg(c.nome) as categorias, CASE WHEN f.produto_id IS NOT NULL THEN true ELSE false END as is_favorito FROM produtos p LEFT JOIN produto_categoria pc ON p.id = pc.produto_id LEFT JOIN categorias c ON pc.categoria_id = c.id LEFT JOIN favoritos f ON p.id = f.produto_id AND f.usuario_id = $1 `; const params = [userId]; const conditions = []; if (search) { params.push(`%${search}%`); conditions.push(`p.nome ILIKE $${params.length}`); } if (categoria) { params.push(categoria); conditions.push(`p.id IN (SELECT produto_id FROM produto_categoria WHERE categoria_id = (SELECT id FROM categorias WHERE nome = $${params.length}))`); } if (conditions.length > 0) { query += ` WHERE ${conditions.join(' AND ')}`; } query += ' GROUP BY p.id, f.produto_id ORDER BY p.id ASC'; try { const result = await pool.query(query, params); res.json(result.rows); } catch (err) { console.error('Erro ao buscar produtos:', err); res.status(500).send('Erro no servidor'); }});
 app.post('/api/auth/register', async (req, res) => { const { nome, email, senha } = req.body; if (!nome || !email || !senha) return res.status(400).json({ message: 'Preencha tudo.' }); try { const salt = await bcrypt.genSalt(10); const senha_hash = await bcrypt.hash(senha, salt); const newUser = await pool.query('INSERT INTO usuarios (nome, email, senha_hash) VALUES ($1, $2, $3) RETURNING id, nome, email', [nome, email, senha_hash]); res.status(201).json(newUser.rows[0]); } catch (err) { if (err.code === '23505') return res.status(400).json({ message: 'E-mail já cadastrado.' }); res.status(500).json({ message: 'Erro no servidor.' }); }});
 app.post('/api/auth/login', async (req, res) => { const { email, senha } = req.body; if (!email || !senha) return res.status(400).json({ message: 'Preencha tudo.' }); try { const userResult = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]); if (userResult.rows.length === 0) return res.status(401).json({ message: 'Credenciais inválidas.' }); const user = userResult.rows[0]; const isMatch = await bcrypt.compare(senha, user.senha_hash); if (!isMatch) return res.status(401).json({ message: 'Credenciais inválidas.' }); const payload = { id: user.id, nome: user.nome }; const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' }); res.json({ token, user: payload }); } catch (err) { res.status(500).json({ message: 'Erro no servidor.' }); }});
@@ -46,74 +46,48 @@ app.delete('/api/categorias/:id', checkPassword, async (req, res) => { const { i
 app.get('/api/meus-favoritos', verifyToken, async (req, res) => { try { const result = await pool.query('SELECT produto_id FROM favoritos WHERE usuario_id = $1', [req.user.id]); res.json(result.rows.map(row => row.produto_id)); } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }});
 app.post('/api/favoritos', verifyToken, async (req, res) => { const { produtoId } = req.body; try { await pool.query('INSERT INTO favoritos (usuario_id, produto_id) VALUES ($1, $2)', [req.user.id, produtoId]); res.status(201).json({ message: 'Produto favoritado com sucesso.' }); } catch (err) { if (err.code === '23505') return res.status(400).json({ message: 'Produto já favoritado.' }); res.status(500).json({ message: 'Erro no servidor' }); }});
 app.delete('/api/favoritos/:produtoId', verifyToken, async (req, res) => { const { produtoId } = req.params; try { await pool.query('DELETE FROM favoritos WHERE usuario_id = $1 AND produto_id = $2', [req.user.id, produtoId]); res.status(200).json({ message: 'Produto desfavoritado com sucesso.' }); } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }});
+app.get('/api/banners/ativos', async (req, res) => { try { const result = await pool.query('SELECT * FROM banners WHERE is_active = true ORDER BY ordem ASC'); res.json(result.rows); } catch (err) { console.error('Erro ao buscar banners ativos:', err); res.status(500).send('Erro no servidor'); }});
+app.get('/api/banners', checkPassword, async (req, res) => { try { const result = await pool.query('SELECT * FROM banners ORDER BY ordem ASC'); res.json(result.rows); } catch (err) { console.error('Erro ao buscar banners para o admin:', err); res.status(500).send('Erro no servidor'); }});
+app.post('/api/banners', checkPassword, async (req, res) => { const { imagem_url, link_url, titulo, subtitulo, is_active, ordem } = req.body; try { const newBanner = await pool.query('INSERT INTO banners (imagem_url, link_url, titulo, subtitulo, is_active, ordem) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [imagem_url, link_url, titulo, subtitulo, is_active, ordem]); res.status(201).json(newBanner.rows[0]); } catch (err) { console.error('Erro ao criar banner:', err); res.status(500).send('Erro no servidor'); }});
+app.put('/api/banners/:id', checkPassword, async (req, res) => { const { id } = req.params; const { imagem_url, link_url, titulo, subtitulo, is_active, ordem } = req.body; try { const updatedBanner = await pool.query('UPDATE banners SET imagem_url = $1, link_url = $2, titulo = $3, subtitulo = $4, is_active = $5, ordem = $6 WHERE id = $7 RETURNING *', [imagem_url, link_url, titulo, subtitulo, is_active, ordem, id]); res.json(updatedBanner.rows[0]); } catch (err) { console.error('Erro ao atualizar banner:', err); res.status(500).send('Erro no servidor'); }});
+app.delete('/api/banners/:id', checkPassword, async (req, res) => { const { id } = req.params; try { await pool.query('DELETE FROM banners WHERE id = $1', [id]); res.status(204).send(); } catch (err) { console.error('Erro ao deletar banner:', err); res.status(500).send('Erro no servidor'); }});
 
 
 // ========================================================================
-// >> NOVAS ROTAS PARA GERENCIAR BANNERS <<
+// >> NOVAS ROTAS PARA GERENCIAR ENDEREÇOS (protegidas) <<
 // ========================================================================
-
-// Rota PÚBLICA para o cliente buscar os banners ativos
-app.get('/api/banners/ativos', async (req, res) => {
+app.get('/api/enderecos', verifyToken, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM banners WHERE is_active = true ORDER BY ordem ASC');
+        const result = await pool.query('SELECT * FROM enderecos WHERE usuario_id = $1', [req.user.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Erro ao buscar banners ativos:', err);
-        res.status(500).send('Erro no servidor');
+        console.error('Erro ao buscar endereços:', err);
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 
-// Rota para o ADMIN buscar TODOS os banners
-app.get('/api/banners', checkPassword, async (req, res) => {
+app.post('/api/enderecos', verifyToken, async (req, res) => {
+    const { logradouro, numero, complemento, bairro, cidade, estado, cep, nome_identificador } = req.body;
     try {
-        const result = await pool.query('SELECT * FROM banners ORDER BY ordem ASC');
-        res.json(result.rows);
-    } catch (err) {
-        console.error('Erro ao buscar banners para o admin:', err);
-        res.status(500).send('Erro no servidor');
-    }
-});
-
-// Rota para o ADMIN criar um novo banner
-app.post('/api/banners', checkPassword, async (req, res) => {
-    const { imagem_url, link_url, titulo, subtitulo, is_active, ordem } = req.body;
-    try {
-        const newBanner = await pool.query(
-            'INSERT INTO banners (imagem_url, link_url, titulo, subtitulo, is_active, ordem) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [imagem_url, link_url, titulo, subtitulo, is_active, ordem]
+        const newAddress = await pool.query(
+            'INSERT INTO enderecos (usuario_id, logradouro, numero, complemento, bairro, cidade, estado, cep, nome_identificador) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [req.user.id, logradouro, numero, complemento, bairro, cidade, estado, cep, nome_identificador]
         );
-        res.status(201).json(newBanner.rows[0]);
+        res.status(201).json(newAddress.rows[0]);
     } catch (err) {
-        console.error('Erro ao criar banner:', err);
-        res.status(500).send('Erro no servidor');
+        console.error('Erro ao salvar endereço:', err);
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 
-// Rota para o ADMIN atualizar um banner
-app.put('/api/banners/:id', checkPassword, async (req, res) => {
-    const { id } = req.params;
-    const { imagem_url, link_url, titulo, subtitulo, is_active, ordem } = req.body;
-    try {
-        const updatedBanner = await pool.query(
-            'UPDATE banners SET imagem_url = $1, link_url = $2, titulo = $3, subtitulo = $4, is_active = $5, ordem = $6 WHERE id = $7 RETURNING *',
-            [imagem_url, link_url, titulo, subtitulo, is_active, ordem, id]
-        );
-        res.json(updatedBanner.rows[0]);
-    } catch (err) {
-        console.error('Erro ao atualizar banner:', err);
-        res.status(500).send('Erro no servidor');
-    }
-});
-
-// Rota para o ADMIN deletar um banner
-app.delete('/api/banners/:id', checkPassword, async (req, res) => {
+app.delete('/api/enderecos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     try {
-        await pool.query('DELETE FROM banners WHERE id = $1', [id]);
+        await pool.query('DELETE FROM enderecos WHERE id = $1 AND usuario_id = $2', [id, req.user.id]);
         res.status(204).send();
     } catch (err) {
-        console.error('Erro ao deletar banner:', err);
-        res.status(500).send('Erro no servidor');
+        console.error('Erro ao deletar endereço:', err);
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 
