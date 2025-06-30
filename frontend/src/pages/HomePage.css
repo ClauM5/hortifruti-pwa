@@ -1,21 +1,113 @@
-/* Arquivo: frontend/src/pages/HomePage.css */
-.store-container { display: flex; flex-direction: column; gap: 2rem; }
-.filters-sidebar { flex: 1; border-bottom: 1px solid #ddd; padding-bottom: 1rem; }
-.filters-sidebar h4 { margin-top: 0; }
-.filters-sidebar ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; overflow-x: auto; }
-.filters-sidebar li { padding: 0.5rem 1rem; cursor: pointer; font-weight: 500; color: #555; transition: color 0.2s; border-radius: 20px; white-space: nowrap; background-color: #f0f0f0; }
-.filters-sidebar li:hover { background-color: #e0e0e0; }
-.filters-sidebar li.active { color: white; background-color: #4CAF50; font-weight: 700; }
-.product-area { flex-grow: 1; }
-.search-bar { display: flex; gap: 1rem; margin-bottom: 1rem; }
-.search-bar input { width: 100%; padding: 0.8rem 1rem; border: 1px solid #ccc; border-radius: 25px; font-size: 1rem; }
-.search-bar .clear-button { background: none; border: none; color: #f44336; cursor: pointer; font-weight: bold; white-space: nowrap; }
-.product-card { position: relative; }
-.favorite-button { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.8); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: #ccc; z-index: 5; }
-.favorite-button:hover { transform: scale(1.1); }
-.favorite-button.favorited { color: #f44336; }
+/* Arquivo: frontend/src/pages/HomePage.css (Com correção final de responsividade) */
 
-/* >> REGRAS DE RESPONSIVIDADE << */
+.store-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.filters-sidebar {
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+}
+
+.filters-sidebar h4 {
+    margin-top: 0;
+}
+
+.filters-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+}
+
+.filters-sidebar li {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #555;
+    transition: color 0.2s;
+    border-radius: 20px;
+    white-space: nowrap;
+    background-color: #f0f0f0;
+}
+
+.filters-sidebar li:hover {
+    background-color: #e0e0e0;
+}
+
+.filters-sidebar li.active {
+    color: white;
+    background-color: #4CAF50;
+    font-weight: 700;
+}
+
+.product-area {
+    flex-grow: 1;
+}
+
+.search-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.search-bar input {
+    flex-grow: 1; /* <<-- A CORREÇÃO ESTÁ AQUI */
+    padding: 0.8rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1rem;
+    min-width: 0; /* Ajuda a garantir que o flexbox possa encolher o input */
+}
+
+.search-bar .clear-button {
+    background: none;
+    border: none;
+    color: #f44336;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+    padding: 0; /* Remove padding extra */
+}
+
+.product-card {
+    position: relative;
+}
+
+.favorite-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #ccc;
+    z-index: 5;
+}
+
+.favorite-button:hover {
+    transform: scale(1.1);
+}
+
+.favorite-button.favorited {
+    color: #f44336;
+}
+
+/* REGRAS PARA TELAS MAIORES */
 @media (min-width: 768px) {
     .store-container {
         flex-direction: row;
@@ -28,6 +120,7 @@
     .filters-sidebar ul {
         flex-direction: column;
         gap: 0;
+        overflow-x: visible;
     }
     .filters-sidebar li {
       background-color: transparent;
