@@ -1,10 +1,11 @@
-// Arquivo: frontend/src/pages/HomePage.jsx (Com Feedback Visual)
+// Arquivo: frontend/src/pages/HomePage.jsx (Com Carrossel de Banners)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import '../App.css';
 import './HomePage.css';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import BannerCarousel from '../components/BannerCarousel'; // << 1. Importa o novo componente
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 
@@ -14,8 +15,6 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  
-  // << NOVO ESTADO para controlar o feedback visual >>
   const [addedProductId, setAddedProductId] = useState(null);
 
   const { addToCart } = useCart();
@@ -44,23 +43,16 @@ function HomePage() {
   
   const handleClearFilters = () => { setSearchTerm(''); setSelectedCategory(''); };
 
-  // << NOVA FUNÇÃO que "envelopa" a original e adiciona o feedback >>
   const handleAddToCart = (produto) => {
-    addToCart(produto); // 1. Adiciona o produto ao carrinho (lógica do context)
-    setAddedProductId(produto.id); // 2. Marca o ID do produto como "adicionado"
-    
-    // 3. Depois de 2 segundos, limpa a marcação para o botão voltar ao normal
-    setTimeout(() => {
-      setAddedProductId(null);
-    }, 2000);
+    addToCart(produto);
+    setAddedProductId(produto.id);
+    setTimeout(() => { setAddedProductId(null); }, 2000);
   };
 
   return (
     <>
-      <header className="App-header">
-        <h1>Hortifruti Frescor</h1>
-        <p>Encontre os melhores produtos, frescos e selecionados para você.</p>
-      </header>
+      {/* 2. Adiciona o componente do carrossel no topo */}
+      <BannerCarousel />
       
       <div className="store-container">
         <aside className="filters-sidebar">
@@ -84,23 +76,13 @@ function HomePage() {
                   {user && (
                     <button className={`favorite-button ${produto.is_favorito ? 'favorited' : ''}`} onClick={() => toggleFavorito(produto.id)}> ❤️ </button>
                   )}
-                  
                   <img src={produto.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={produto.nome} className="product-image" />
                   <div className="card-content">
                     <h2 className="product-name">{produto.nome}</h2>
                     <p className="product-price"> R$ {Number(produto.preco).toFixed(2).replace('.', ',')} / {produto.unidade} </p>
-                    
-                    {/* ======================================================= */}
-                    {/* >> BOTÃO ATUALIZADO COM LÓGICA CONDICIONAL << */}
-                    {/* ======================================================= */}
-                    <button 
-                      onClick={() => handleAddToCart(produto)} 
-                      className={`add-to-cart-button ${addedProductId === produto.id ? 'added' : ''}`}
-                      disabled={addedProductId === produto.id}
-                    >
+                    <button onClick={() => handleAddToCart(produto)} className={`add-to-cart-button ${addedProductId === produto.id ? 'added' : ''}`} disabled={addedProductId === produto.id}>
                       {addedProductId === produto.id ? 'Adicionado ✅' : 'Adicionar ao Carrinho'}
                     </button>
-
                   </div>
                 </div>
               ))
@@ -111,5 +93,4 @@ function HomePage() {
     </>
   );
 }
-
 export default HomePage;
