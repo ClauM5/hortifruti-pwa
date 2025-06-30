@@ -1,15 +1,15 @@
 // Arquivo: frontend/src/App.jsx
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout'; 
+import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
 import CheckoutPage from './pages/CheckoutPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import AccountPage from './pages/AccountPage';
-import FavoritesPage from './pages/FavoritesPage'; // <-- Importa a nova página
+import FavoritesPage from './pages/FavoritesPage';
+import CartPage from './pages/CartPage'; // <-- Importa a nova página
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -25,7 +25,8 @@ function App() {
               <Route path="register" element={<RegisterPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="minha-conta" element={<AccountPage />} />
-              <Route path="meus-favoritos" element={<FavoritesPage />} /> {/* <-- Adiciona a nova rota */}
+              <Route path="meus-favoritos" element={<FavoritesPage />} />
+              <Route path="carrinho" element={<CartPage />} /> {/* <-- Adiciona a nova rota */}
             </Route>
             <Route path="/admin" element={<AdminPage />} />
           </Routes>

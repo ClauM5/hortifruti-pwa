@@ -1,3 +1,4 @@
+// Arquivo: frontend/src/components/Navbar.jsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,11 +10,7 @@ function Navbar() {
   const { cartItems } = useCart();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
+  const handleLogout = () => { logout(); navigate('/'); };
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -31,7 +28,8 @@ function Navbar() {
             <Link to="/register">Cadastrar</Link>
           </>
         )}
-        <Link to="/checkout" className="cart-link">
+        {/* O link agora aponta para /carrinho */}
+        <Link to="/carrinho" className="cart-link">
           🛒 Carrinho ({cartItemCount})
         </Link>
       </div>
