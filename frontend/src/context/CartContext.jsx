@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/context/CartContext.jsx (Final com clearCart)
+// Arquivo: frontend/src/context/CartContext.jsx (Com addMultipleItemsToCart)
 
 import React, { createContext, useState, useContext, useCallback, useMemo } from 'react';
 
@@ -12,13 +12,37 @@ export function CartProvider({ children }) {
       const itemExists = prevItems.find(item => item.id === product.id);
       if (itemExists) {
         return prevItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
         return [...prevItems, { ...product, quantity: 1 }];
       }
+    });
+  }, []);
+
+  // >>>>> NOVA FUNÇÃO <<<<<
+  const addMultipleItemsToCart = useCallback((productsToAdd) => {
+    setCartItems(prevItems => {
+      let newItems = [...prevItems];
+      productsToAdd.forEach(productToAdd => {
+        const itemExists = newItems.find(item => item.id === productToAdd.produto_id);
+        if (itemExists) {
+          // Se o item já existe, apenas aumenta a quantidade
+          newItems = newItems.map(item =>
+            item.id === productToAdd.produto_id
+              ? { ...item, quantity: item.quantity + productToAdd.quantidade }
+              : item
+          );
+        } else {
+          // Se não existe, precisamos dos detalhes completos do produto.
+          // Esta função assume que o objeto 'productToAdd' tem as infos necessárias.
+          // Para o nosso caso (vindo do histórico de pedidos), ele não tem o nome, etc.
+          // Vamos simplificar por agora, mas o ideal seria buscar os detalhes do produto.
+          // Por enquanto, esta função não é usada, mas a deixamos como base.
+          // A lógica de recompra será feita diretamente na página da conta.
+        }
+      });
+      return newItems;
     });
   }, []);
 
@@ -38,8 +62,6 @@ export function CartProvider({ children }) {
     }
   }, [removeFromCart]);
 
-  // >>>>> NOVA FUNÇÃO <<<<<
-  // Simplesmente define o array de itens do carrinho como um array vazio.
   const clearCart = useCallback(() => {
     setCartItems([]);
   }, []);
@@ -49,8 +71,9 @@ export function CartProvider({ children }) {
     addToCart,
     removeFromCart,
     updateQuantity,
-    clearCart, // <-- Adiciona a nova função ao nosso "quadro de avisos"
-  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart]);
+    clearCart,
+    addMultipleItemsToCart, // <-- Exporta a nova função
+  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart, addMultipleItemsToCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
