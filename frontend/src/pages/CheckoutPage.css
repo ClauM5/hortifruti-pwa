@@ -1,114 +1,46 @@
 /* Arquivo: frontend/src/pages/CheckoutPage.css */
 
-.checkout-container {
-    max-width: 960px;
-    margin: 2rem auto;
-}
+.checkout-container { max-width: 960px; margin: 2rem auto; }
+.checkout-container h2 { text-align: center; margin-bottom: 2rem; }
+.checkout-content { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+.order-summary { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; align-self: flex-start; }
+.order-summary h3 { margin-top: 0; }
+.summary-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #eee; }
+.summary-total { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #ddd; font-size: 1.2rem; text-align: right; }
+.checkout-form { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.checkout-form h3 { margin-top: 0; }
+.checkout-form label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+.checkout-form input, .checkout-form textarea, .checkout-form select { width: 100%; padding: 12px; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background-color: #fff; }
+.checkout-form textarea { resize: vertical; }
+.primary-button { width: 100%; padding: 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+.primary-button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
+.error-message { color: #D32F2F; font-weight: bold; margin-bottom: 1rem; text-align: center; }
 
-.checkout-container h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.checkout-content {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 2rem;
-}
-
-.order-summary {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border: 1px solid #eee;
-    align-self: flex-start; /* Impede que estique */
-}
-
-.order-summary h3 {
-    margin-top: 0;
-}
-
-.summary-item {
+/* >> NOVOS ESTILOS << */
+.delivery-method-selector {
     display: flex;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #eee;
-}
-
-.summary-total {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid #ddd;
-    font-size: 1.2rem;
-    text-align: right;
-}
-
-.checkout-form {
-    background: #fff;
-    padding: 2rem;
+    gap: 1rem;
+    background-color: #f0f8ff;
+    padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.checkout-form h3 {
-    margin-top: 0;
-}
-
-.checkout-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.checkout-form input,
-.checkout-form textarea,
-.checkout-form select {
-    width: 100%;
-    padding: 12px;
     margin-bottom: 1.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    box-sizing: border-box;
-    background-color: #fff;
+}
+.delivery-method-selector label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+}
+.pickup-info {
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+.pickup-info p {
+    margin: 0.5rem 0;
 }
 
-.checkout-form textarea {
-    resize: vertical;
-}
 
-.primary-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.primary-button:disabled {
-    background-color: #a5d6a7;
-    cursor: not-allowed;
-}
-
-.error-message {
-    color: #D32F2F;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-/* Responsividade para telas menores */
-@media (max-width: 768px) {
-    .checkout-content {
-        grid-template-columns: 1fr;
-    }
-
-    .order-summary {
-        grid-row: 1; /* Coloca o resumo no topo em telas pequenas */
-    }
-}
+@media (max-width: 768px) { .checkout-content { grid-template-columns: 1fr; } .order-summary { grid-row: 1; } }

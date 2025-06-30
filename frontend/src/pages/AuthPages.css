@@ -1,5 +1,4 @@
-/* Arquivo: frontend/src/pages/AuthPages.css (Versão Final com Botão de Detalhes) */
-
+/* Arquivo: frontend/src/pages/AuthPages.css */
 .auth-container { display: flex; justify-content: center; align-items: center; padding: 40px; min-height: 80vh; }
 .auth-form { width: 100%; max-width: 400px; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
 .auth-form h2 { margin-bottom: 20px; }
@@ -10,7 +9,7 @@
 .account-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
 .account-header h2 { margin: 0; }
 .logout-button { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-.account-links { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+.account-links { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
 .account-link-box { display: block; background-color: #f9f9f9; padding: 15px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; text-align: center; transition: background-color 0.2s; }
 .account-link-box:hover { background-color: #f0f0f0; }
 .order-history { margin-top: 30px; text-align: left; }
@@ -24,28 +23,10 @@
 .status-saiu-para-entrega { background-color: #795548; }
 .status-entregue { background-color: #4CAF50; }
 .status-cancelado { background-color: #f44336; }
-
-/* Estilos para os botões de ação do pedido */
-.details-button, .reorder-button {
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-    transition: background-color 0.2s, opacity 0.2s;
-}
-.details-button {
-    background-color: #007bff;
-    color: white;
-}
-.details-button:hover {
-    background-color: #0056b3;
-}
-.reorder-button {
-    background-color: #ff9800;
-    color: white;
-}
-.reorder-button:hover {
-    background-color: #f57c00;
-}
+/* >> NOVO ESTILO DE STATUS << */
+.status-pronto-para-retirada { background-color: #9c27b0; } /* Roxo */
+.details-button, .reorder-button { border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background-color 0.2s, opacity 0.2s; }
+.details-button { background-color: #007bff; color: white; }
+.details-button:hover { background-color: #0056b3; }
+.reorder-button { background-color: #ff9800; color: white; }
+.reorder-button:hover { background-color: #f57c00; }
