@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/OrderDetailPage.jsx
+// Arquivo: frontend/src/pages/OrderDetailPage.jsx (Adaptado para Retirada na Loja)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -8,10 +8,12 @@ import './OrderDetailPage.css';
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 const WS_URL = 'wss://hortifruti-backend.onrender.com';
 
-// Componente para o Timeline de Status
 const StatusTimeline = ({ status }) => {
-    const statuses = ['Recebido', 'Em Preparo', 'Saiu para Entrega', 'Entregue'];
-    const currentStatusIndex = statuses.indexOf(status);
+    // Adicionamos o novo status à lista
+    const statuses = ['Recebido', 'Em Preparo', 'Pronto para retirada', 'Saiu para Entrega', 'Entregue'];
+    // Lógica para lidar com status que não estão na timeline principal (ex: Cancelado)
+    const displayStatus = statuses.includes(status) ? status : 'Recebido';
+    const currentStatusIndex = statuses.indexOf(displayStatus);
 
     return (
         <div className="timeline-container">
@@ -29,7 +31,6 @@ function OrderDetailPage() {
     const { id: pedidoId } = useParams();
     const { token } = useAuth();
     const navigate = useNavigate();
-
     const [pedido, setPedido] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -37,42 +38,26 @@ function OrderDetailPage() {
     const fetchPedidoDetails = useCallback(async () => {
         if (!token) return;
         try {
-            const response = await fetch(`${API_BASE_URL}/pedidos/${pedidoId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) {
-                throw new Error('Não foi possível carregar os detalhes do pedido.');
-            }
+            const response = await fetch(`${API_BASE_URL}/pedidos/${pedidoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error('Não foi possível carregar os detalhes do pedido.');
             const data = await response.json();
             setPedido(data);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { setError(err.message); } finally { setLoading(false); }
     }, [pedidoId, token]);
 
-    useEffect(() => {
-        fetchPedidoDetails();
-    }, [fetchPedidoDetails]);
+    useEffect(() => { fetchPedidoDetails(); }, [fetchPedidoDetails]);
 
-    // Lógica do WebSocket para atualizações em tempo real
     useEffect(() => {
         if (!token) return;
-
         const ws = new WebSocket(`${WS_URL}?token=${token}`);
-
         ws.onopen = () => console.log('Conectado ao WebSocket para rastreamento.');
-
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             if (message.type === 'STATUS_UPDATE' && message.payload.pedidoId === parseInt(pedidoId)) {
                 setPedido(prevPedido => ({ ...prevPedido, status: message.payload.novoStatus }));
             }
         };
-
         ws.onclose = () => console.log('Desconectado do WebSocket de rastreamento.');
-
         return () => ws.close();
     }, [token, pedidoId]);
 
@@ -83,10 +68,7 @@ function OrderDetailPage() {
 
     return (
         <div className="order-detail-container">
-            <button onClick={() => navigate('/minha-conta')} className="back-button">
-                &larr; Voltar para Meus Pedidos
-            </button>
-
+            <button onClick={() => navigate('/minha-conta')} className="back-button">&larr; Voltar para Meus Pedidos</button>
             <h2>Detalhes do Pedido #{pedido.id}</h2>
 
             <div className="order-detail-card status-card">
@@ -96,24 +78,25 @@ function OrderDetailPage() {
 
             <div className="order-detail-card items-card">
                 <h3>Itens do Pedido</h3>
-                <ul>
-                    {pedido.itens.map(item => (
-                        <li key={item.id}>
-                            <span>{item.quantidade}x {item.produto_nome}</span>
-                            <span>R$ {(Number(item.preco_unitario) * item.quantidade).toFixed(2).replace('.', ',')}</span>
-                        </li>
-                    ))}
-                </ul>
-                <div className="order-total">
-                    <strong>Total: R$ {Number(pedido.valor_total).toFixed(2).replace('.', ',')}</strong>
-                </div>
+                <ul>{pedido.itens.map(item => (<li key={item.id}><span>{item.quantidade}x {item.produto_nome}</span><span>R$ {(Number(item.preco_unitario) * item.quantity).toFixed(2).replace('.', ',')}</span></li>))}</ul>
+                <div className="order-total"><strong>Total: R$ {Number(pedido.valor_total).toFixed(2).replace('.', ',')}</strong></div>
             </div>
 
             <div className="order-detail-card info-card">
-                <h3>Informações da Entrega</h3>
+                <h3>Informações do Pedido</h3>
                 <p><strong>Cliente:</strong> {pedido.nome_cliente}</p>
-                <p><strong>Endereço:</strong> {pedido.endereco_cliente}</p>
                 <p><strong>Pagamento:</strong> {pedido.metodo_pagamento}</p>
+                
+                {/* ======================================================= */}
+                {/* >> LÓGICA CONDICIONAL PARA ENTREGA/RETIRADA << */}
+                {/* ======================================================= */}
+                {pedido.endereco_cliente === 'Retirada na Loja' ? (
+                    <div className="pickup-info-details">
+                        <p><strong>Modalidade:</strong> Retirada na Loja</p>
+                    </div>
+                ) : (
+                    <p><strong>Endereço de Entrega:</strong> {pedido.endereco_cliente}</p>
+                )}
             </div>
         </div>
     );
