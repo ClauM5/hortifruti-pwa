@@ -1,12 +1,13 @@
 /* Arquivo: frontend/src/pages/CheckoutPage.css */
-
 .checkout-container { max-width: 960px; margin: 2rem auto; }
 .checkout-container h2 { text-align: center; margin-bottom: 2rem; }
 .checkout-content { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
 .order-summary { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; align-self: flex-start; }
-.order-summary h3 { margin-top: 0; }
-.summary-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #eee; }
-.summary-total { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #ddd; font-size: 1.2rem; text-align: right; }
+.order-summary h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+.summary-item { display: flex; justify-content: space-between; padding: 0.5rem 0; }
+.summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; }
+.summary-row.discount { color: #4CAF50; }
+.summary-total { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #ddd; font-size: 1.2rem; display: flex; justify-content: space-between; }
 .checkout-form { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .checkout-form h3 { margin-top: 0; }
 .checkout-form label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
@@ -15,32 +16,17 @@
 .primary-button { width: 100%; padding: 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
 .primary-button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
 .error-message { color: #D32F2F; font-weight: bold; margin-bottom: 1rem; text-align: center; }
+.delivery-method-selector { display: flex; gap: 1rem; background-color: #f0f8ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+.delivery-method-selector label { display: flex; align-items: center; gap: 0.5rem; font-weight: normal; }
+.pickup-info { background-color: #fffbe6; border: 1px solid #ffe58f; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+.pickup-info p { margin: 0.5rem 0; }
 
-/* >> NOVOS ESTILOS << */
-.delivery-method-selector {
-    display: flex;
-    gap: 1rem;
-    background-color: #f0f8ff;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-}
-.delivery-method-selector label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: normal;
-}
-.pickup-info {
-    background-color: #fffbe6;
-    border: 1px solid #ffe58f;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-}
-.pickup-info p {
-    margin: 0.5rem 0;
-}
-
+/* >> NOVOS ESTILOS PARA O CAMPO DE CUPOM << */
+.coupon-input-group { display: flex; margin-bottom: 0.5rem; }
+.coupon-input-group input { flex-grow: 1; margin-bottom: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.coupon-input-group button { border: 1px solid #4CAF50; background-color: #4CAF50; color: white; padding: 12px 15px; cursor: pointer; border-top-right-radius: 4px; border-bottom-right-radius: 4px; font-weight: bold; }
+.coupon-message { font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 1.5rem; padding: 0.5rem; border-radius: 4px; }
+.coupon-message.success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+.coupon-message.error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
 
 @media (max-width: 768px) { .checkout-content { grid-template-columns: 1fr; } .order-summary { grid-row: 1; } }
