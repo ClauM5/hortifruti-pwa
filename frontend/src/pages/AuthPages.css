@@ -30,3 +30,13 @@
 .details-button:hover { background-color: #0056b3; }
 .reorder-button { background-color: #ff9800; color: white; }
 .reorder-button:hover { background-color: #f57c00; }
+.notification-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+.notification-button:hover {
+    background-color: #0056b3;
+}

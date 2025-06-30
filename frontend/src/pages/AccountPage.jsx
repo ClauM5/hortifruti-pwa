@@ -1,9 +1,10 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Com correção do WebSocket)
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com botão de notificação)
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { subscribeUserToPush } from '../utils/push-notifications'; // << Importa nossa função
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
@@ -13,76 +14,26 @@ function AccountPage() {
   const { user, token, logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Efeito para buscar os dados iniciais
-  useEffect(() => {
-    if (!token) { setIsLoading(false); return; }
-    
-    const fetchPedidos = async () => {
-      setIsLoading(true);
-      setError('');
-      try {
-        const response = await fetch(`${API_BASE_URL}/meus-pedidos`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!response.ok) throw new Error('Falha ao buscar seus pedidos.');
-        const data = await response.json();
-        setPedidos(data);
-      } catch (err) { setError(err.message); } finally { setIsLoading(false); }
-    };
-    fetchPedidos();
-  }, [token]);
-
-  // Efeito para a conexão WebSocket, agora mais robusto
-  useEffect(() => {
-    if (!token || pedidos.length === 0) return; // Só conecta se tiver token e pedidos para observar
-
-    const ws = new WebSocket(`${WS_URL}?token=${token}`);
-
-    ws.onopen = () => console.log('Conexão WebSocket aberta na página da conta.');
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'STATUS_UPDATE') {
-        console.log("Status update recebido para o pedido:", message.payload.pedidoId);
-        // Encontra o pedido na lista e atualiza apenas o seu status
-        setPedidos(prevPedidos => 
-          prevPedidos.map(p => 
-            p.id === message.payload.pedidoId 
-              ? { ...p, status: message.payload.novoStatus } 
-              : p
-          )
-        );
-      }
-    };
-
-    ws.onerror = (err) => console.error("Erro no WebSocket da conta:", err);
-    ws.onclose = () => console.log('Conexão WebSocket da conta fechada.');
-
-    // Função de limpeza para fechar a conexão
-    return () => {
-      ws.close();
-    };
-  }, [token, pedidos.length]); // Roda o efeito se o token ou a quantidade de pedidos mudar
-
-  // O resto do código continua o mesmo...
+  // ... (toda a lógica de fetch, websocket, etc. continua a mesma)
+  useEffect(() => { if (!token) { setIsLoading(false); return; } const fetchPedidos = async () => { setIsLoading(true); setError(''); try { const response = await fetch(`${API_BASE_URL}/meus-pedidos`, { headers: { 'Authorization': `Bearer ${token}` } }); if (!response.ok) throw new Error('Falha ao buscar seus pedidos.'); const data = await response.json(); setPedidos(data); } catch (err) { setError(err.message); } finally { setIsLoading(false); } }; fetchPedidos(); }, [token]);
+  useEffect(() => { if (!token || pedidos.length === 0) return; const ws = new WebSocket(`${WS_URL}?token=${token}`); ws.onopen = () => console.log('Conexão WebSocket aberta na página da conta.'); ws.onmessage = (event) => { const message = JSON.parse(event.data); if (message.type === 'STATUS_UPDATE') { setPedidos(prevPedidos => prevPedidos.map(p => p.id === message.payload.pedidoId ? { ...p, status: message.payload.novoStatus } : p )); } }; ws.onerror = (err) => console.error("Erro no WebSocket da conta:", err); ws.onclose = () => console.log('Conexão WebSocket da conta fechada.'); return () => { ws.close(); }; }, [token, pedidos.length]);
   const handleLogout = () => { logout(); navigate('/'); };
-  const handleReorder = (itensDoPedido) => {
-    fetch(`${API_BASE_URL}/produtos`)
-      .then(res => res.json())
-      .then(allProducts => {
-        itensDoPedido.forEach(item => {
-          const produtoCompleto = allProducts.find(p => p.id === item.produto_id);
-          if (produtoCompleto) {
-            for (let i = 0; i < item.quantity; i++) {
-              addToCart(produtoCompleto);
-            }
-          }
-        });
-        navigate('/checkout');
-      });
+  const handleReorder = (itensDoPedido) => { fetch(`${API_BASE_URL}/produtos`).then(res => res.json()).then(allProducts => { itensDoPedido.forEach(item => { const produtoCompleto = allProducts.find(p => p.id === item.produto_id); if (produtoCompleto) { for (let i = 0; i < item.quantidade; i++) { addToCart(produtoCompleto); } } }); navigate('/checkout'); }); };
+
+  // << NOVA FUNÇÃO PARA ATIVAR AS NOTIFICAÇÕES >>
+  const handleEnableNotifications = async () => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        await subscribeUserToPush(token);
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            await subscribeUserToPush(token);
+        }
+    }
   };
 
   if (isLoading) return <p>Carregando seus dados...</p>;
@@ -96,6 +47,10 @@ function AccountPage() {
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
+          {/* << NOVO BOTÃO >> */}
+          <button onClick={handleEnableNotifications} className="account-link-box notification-button">
+            Ativar Notificações de Pedidos
+          </button>
         </div>
         <div className="order-history">
           <h3>Seus Pedidos</h3>
@@ -103,16 +58,9 @@ function AccountPage() {
           {pedidos.length > 0 ? (
             pedidos.map(pedido => (
               <div key={pedido.id} className="order-summary-card">
-                <div className="order-summary-header">
-                  <span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
-                  {/* Corrigido para funcionar com espaços no nome do status */}
-                  <span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span>
-                </div>
+                <div className="order-summary-header"><span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span><span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span></div>
                 <div className="order-summary-body"><p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</p></div>
-                <div className="order-summary-actions">
-                  <button onClick={() => navigate(`/pedido/${pedido.id}`)} className="details-button">Ver Detalhes</button>
-                  <button onClick={(e) => { e.preventDefault(); handleReorder(pedido.itens); }} className="reorder-button">Pedir Novamente</button>
-                </div>
+                <div className="order-summary-actions"><button onClick={() => navigate(`/pedido/${pedido.id}`)} className="details-button">Ver Detalhes</button><button onClick={(e) => { e.preventDefault(); handleReorder(pedido.itens); }} className="reorder-button">Pedir Novamente</button></div>
               </div>
             ))
           ) : ( <p>Você ainda não fez nenhum pedido.</p> )}
