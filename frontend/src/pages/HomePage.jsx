@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/HomePage.jsx
+// Arquivo: frontend/src/pages/HomePage.jsx (Com Feedback Visual)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import '../App.css';
@@ -14,6 +14,9 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  
+  // << NOVO ESTADO para controlar o feedback visual >>
+  const [addedProductId, setAddedProductId] = useState(null);
 
   const { addToCart } = useCart();
   const { user, token, toggleFavorito } = useAuth();
@@ -25,9 +28,7 @@ function HomePage() {
     if (selectedCategory) url += `${searchTerm ? '&' : ''}categoria=${selectedCategory}`;
 
     try {
-      const response = await fetch(url, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
+      const response = await fetch(url, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
       const data = await response.json();
       setProdutos(data);
     } catch (error) {
@@ -40,7 +41,19 @@ function HomePage() {
   const fetchCategorias = async () => { try { const response = await fetch(`${API_BASE_URL}/categorias`); const data = await response.json(); setCategorias(data); } catch (error) { console.error("Erro ao buscar categorias:", error); } };
   useEffect(() => { fetchCategorias(); }, []);
   useEffect(() => { const debounceTimer = setTimeout(() => { fetchProdutos(); }, 500); return () => clearTimeout(debounceTimer); }, [fetchProdutos]);
+  
   const handleClearFilters = () => { setSearchTerm(''); setSelectedCategory(''); };
+
+  // << NOVA FUNÇÃO que "envelopa" a original e adiciona o feedback >>
+  const handleAddToCart = (produto) => {
+    addToCart(produto); // 1. Adiciona o produto ao carrinho (lógica do context)
+    setAddedProductId(produto.id); // 2. Marca o ID do produto como "adicionado"
+    
+    // 3. Depois de 2 segundos, limpa a marcação para o botão voltar ao normal
+    setTimeout(() => {
+      setAddedProductId(null);
+    }, 2000);
+  };
 
   return (
     <>
@@ -57,28 +70,37 @@ function HomePage() {
             {categorias.map(cat => ( <li key={cat.id} className={selectedCategory === cat.nome ? 'active' : ''} onClick={() => setSelectedCategory(cat.nome)}>{cat.nome}</li> ))}
           </ul>
         </aside>
+
         <main className="product-area">
           <div className="search-bar">
             <input type="text" placeholder="O que você procura hoje?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             {(searchTerm || selectedCategory) && ( <button onClick={handleClearFilters} className="clear-button">Limpar Filtros</button> )}
           </div>
+
           <div className="product-grid">
             {loading ? <p>Carregando produtos...</p> : produtos.length > 0 ? (
               produtos.map(produto => (
                 <div key={produto.id} className="product-card">
                   {user && (
-                    <button 
-                      className={`favorite-button ${produto.is_favorito ? 'favorited' : ''}`} 
-                      onClick={() => toggleFavorito(produto.id)}
-                    >
-                      ❤️
-                    </button>
+                    <button className={`favorite-button ${produto.is_favorito ? 'favorited' : ''}`} onClick={() => toggleFavorito(produto.id)}> ❤️ </button>
                   )}
+                  
                   <img src={produto.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={produto.nome} className="product-image" />
                   <div className="card-content">
                     <h2 className="product-name">{produto.nome}</h2>
                     <p className="product-price"> R$ {Number(produto.preco).toFixed(2).replace('.', ',')} / {produto.unidade} </p>
-                    <button onClick={() => addToCart(produto)} className="add-to-cart-button"> Adicionar ao Carrinho </button>
+                    
+                    {/* ======================================================= */}
+                    {/* >> BOTÃO ATUALIZADO COM LÓGICA CONDICIONAL << */}
+                    {/* ======================================================= */}
+                    <button 
+                      onClick={() => handleAddToCart(produto)} 
+                      className={`add-to-cart-button ${addedProductId === produto.id ? 'added' : ''}`}
+                      disabled={addedProductId === produto.id}
+                    >
+                      {addedProductId === produto.id ? 'Adicionado ✅' : 'Adicionar ao Carrinho'}
+                    </button>
+
                   </div>
                 </div>
               ))
@@ -89,4 +111,5 @@ function HomePage() {
     </>
   );
 }
+
 export default HomePage;
