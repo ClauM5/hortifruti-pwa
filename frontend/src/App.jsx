@@ -10,7 +10,8 @@ import LoginPage from './pages/LoginPage';
 import AccountPage from './pages/AccountPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
-import OrderDetailPage from './pages/OrderDetailPage'; // <-- Importa a nova página
+import OrderDetailPage from './pages/OrderDetailPage';
+import AddressPage from './pages/AddressPage'; // <-- Importa a nova página
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -28,7 +29,8 @@ function App() {
               <Route path="minha-conta" element={<AccountPage />} />
               <Route path="meus-favoritos" element={<FavoritesPage />} />
               <Route path="carrinho" element={<CartPage />} />
-              <Route path="pedido/:id" element={<OrderDetailPage />} /> {/* <-- Adiciona a nova rota */}
+              <Route path="pedido/:id" element={<OrderDetailPage />} />
+              <Route path="meus-enderecos" element={<AddressPage />} /> {/* <-- Adiciona a nova rota */}
             </Route>
             <Route path="/admin" element={<AdminPage />} />
           </Routes>

@@ -1,5 +1,4 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Final com Atualização em Tempo Real)
-
+// Arquivo: frontend/src/pages/AccountPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -7,17 +6,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
-const WS_URL = 'wss://hortifruti-backend.onrender.com'; // URL do WebSocket
 
 function AccountPage() {
   const { user, token, logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Efeito para buscar os dados iniciais
   useEffect(() => {
     if (!token) { setIsLoading(false); return; }
     const fetchPedidos = async () => {
@@ -30,33 +26,6 @@ function AccountPage() {
     };
     fetchPedidos();
   }, [token]);
-
-  // Efeito para a conexão WebSocket
-  useEffect(() => {
-    if (!token) return;
-
-    const ws = new WebSocket(`${WS_URL}?token=${token}`);
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'STATUS_UPDATE') {
-        // Encontra o pedido na lista e atualiza apenas o seu status
-        setPedidos(prevPedidos => 
-          prevPedidos.map(p => 
-            p.id === message.payload.pedidoId 
-              ? { ...p, status: message.payload.novoStatus } 
-              : p
-          )
-        );
-      }
-    };
-
-    // Função de limpeza para fechar a conexão
-    return () => {
-      ws.close();
-    };
-  }, [token]);
-
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -84,9 +53,12 @@ function AccountPage() {
       <div className="account-page">
         <div className="account-header"><h2>Minha Conta</h2><button onClick={handleLogout} className="logout-button">Sair</button></div>
         <p>Olá, <strong>{user.nome}!</strong></p>
-        <div className="account-links"><Link to="/meus-favoritos" className="account-link-box">Ver meus favoritos</Link></div>
+        <div className="account-links">
+          <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
+          <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link> {/* <-- Adiciona o link */}
+        </div>
         <div className="order-history">
-          <h3>Seus Pedidos</h3>
+          <h3>Seus Pedidos Recentes</h3>
           {pedidos.length > 0 ? (
             pedidos.map(pedido => (
               <div key={pedido.id} className="order-summary-card">
@@ -94,9 +66,7 @@ function AccountPage() {
                   <span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
                   <span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span>
                 </div>
-                <div className="order-summary-body">
-                    <p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</p>
-                </div>
+                <div className="order-summary-body"><p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</p></div>
                 <div className="order-summary-actions">
                   <button onClick={() => navigate(`/pedido/${pedido.id}`)} className="details-button">Ver Detalhes</button>
                   <button onClick={() => handleReorder(pedido.itens)} className="reorder-button">Pedir Novamente</button>

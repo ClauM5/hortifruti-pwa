@@ -1,0 +1,68 @@
+/* Arquivo: frontend/src/pages/AddressPage.css */
+.address-manager-container {
+    max-width: 800px;
+}
+
+.address-manager-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.address-form {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.address-form h3 {
+    margin-top: 0;
+}
+
+.address-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.address-list {
+    margin-top: 2rem;
+}
+
+.address-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.address-card h4 {
+    margin: 0 0 1rem 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.address-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+
+.delete-address-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #f44336;
+    font-size: 1.5rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+.delete-address-btn::after {
+    content: '×'; /* usa o caractere de multiplicação como um "X" */
+}
