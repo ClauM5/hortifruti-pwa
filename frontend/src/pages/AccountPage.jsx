@@ -1,4 +1,5 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com botão "Ver Detalhes")
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -58,19 +59,19 @@ function AccountPage() {
           <h3>Seus Pedidos</h3>
           {pedidos.length > 0 ? (
             pedidos.map(pedido => (
-              // Envolvemos o card do pedido em um Link
-              <Link to={`/pedido/${pedido.id}`} key={pedido.id} className="order-summary-card-link">
-                <div className="order-summary-card">
-                  <div className="order-summary-header">
-                    <span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
-                    <span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span>
-                  </div>
-                  <div className="order-summary-footer">
-                    <strong>Total: R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</strong>
-                    <button onClick={(e) => { e.preventDefault(); handleReorder(pedido.itens); }} className="reorder-button">Pedir Novamente</button>
-                  </div>
+              <div key={pedido.id} className="order-summary-card">
+                <div className="order-summary-header">
+                  <span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
+                  <span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span>
                 </div>
-              </Link>
+                <div className="order-summary-body">
+                    <p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</p>
+                </div>
+                <div className="order-summary-actions">
+                  <button onClick={() => navigate(`/pedido/${pedido.id}`)} className="details-button">Ver Detalhes</button>
+                  <button onClick={() => handleReorder(pedido.itens)} className="reorder-button">Pedir Novamente</button>
+                </div>
+              </div>
             ))
           ) : ( <p>Você ainda não fez nenhum pedido.</p> )}
         </div>
