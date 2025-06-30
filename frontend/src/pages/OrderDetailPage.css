@@ -1,0 +1,129 @@
+/* Arquivo: frontend/src/pages/OrderDetailPage.css */
+
+.order-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.order-detail-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.order-detail-card {
+    background: var(--card-bg);
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.order-detail-card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.items-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.items-card li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.items-card li:last-child {
+    border-bottom: none;
+}
+
+.order-total {
+    display: flex;
+    justify-content: flex-end;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #eee;
+}
+
+/* Estilos para o Timeline de Status */
+.timeline-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex-grow: 1;
+}
+
+.timeline-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: 3px solid var(--bg-color);
+    z-index: 2;
+    transition: background-color 0.3s;
+}
+
+.timeline-label {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}
+
+.timeline-step::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 100%;
+    height: 4px;
+    background-color: #ccc;
+    z-index: 1;
+}
+
+.timeline-step:first-child::before {
+    width: 50%;
+    left: 50%;
+}
+
+.timeline-step:last-child::before {
+    width: 50%;
+    left: 0;
+}
+
+/* Estilos para o passo completo */
+.timeline-step.completed .timeline-dot {
+    background-color: var(--primary-color);
+}
+
+.timeline-step.completed::before {
+    background-color: var(--primary-color);
+}
+
+.timeline-step.completed .timeline-label {
+    color: #000;
+    font-weight: bold;
+}
