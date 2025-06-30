@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Com botão "Ver Detalhes")
+// Arquivo: frontend/src/pages/AccountPage.jsx (Final com Atualização em Tempo Real)
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -7,14 +7,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
+const WS_URL = 'wss://hortifruti-backend.onrender.com'; // URL do WebSocket
 
 function AccountPage() {
   const { user, token, logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Efeito para buscar os dados iniciais
   useEffect(() => {
     if (!token) { setIsLoading(false); return; }
     const fetchPedidos = async () => {
@@ -27,6 +30,33 @@ function AccountPage() {
     };
     fetchPedidos();
   }, [token]);
+
+  // Efeito para a conexão WebSocket
+  useEffect(() => {
+    if (!token) return;
+
+    const ws = new WebSocket(`${WS_URL}?token=${token}`);
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'STATUS_UPDATE') {
+        // Encontra o pedido na lista e atualiza apenas o seu status
+        setPedidos(prevPedidos => 
+          prevPedidos.map(p => 
+            p.id === message.payload.pedidoId 
+              ? { ...p, status: message.payload.novoStatus } 
+              : p
+          )
+        );
+      }
+    };
+
+    // Função de limpeza para fechar a conexão
+    return () => {
+      ws.close();
+    };
+  }, [token]);
+
 
   const handleLogout = () => { logout(); navigate('/'); };
 
