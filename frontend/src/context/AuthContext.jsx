@@ -2,33 +2,45 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
-const AuthContext = createContext();
-
 const API_AUTH_URL = 'https://hortifruti-backend.onrender.com/api/auth';
+const API_FAVORITOS_URL = 'https://hortifruti-backend.onrender.com/api/favoritos';
+
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [favoritos, setFavoritos] = useState(new Set()); // Usaremos um Set para performance
   const [isLoading, setIsLoading] = useState(true);
 
-  // Efeito para verificar o token no localStorage ao carregar o app
+  const fetchFavoritos = useCallback(async (currentToken) => {
+    if (!currentToken) return;
+    try {
+      const response = await fetch(`${API_FAVORITOS_URL.replace('/favoritos', '/meus-favoritos')}`, {
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      });
+      if (!response.ok) throw new Error('Falha ao buscar favoritos');
+      const data = await response.json();
+      setFavoritos(new Set(data));
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   useEffect(() => {
     if (token) {
-      // Aqui, em um app mais complexo, você verificaria se o token ainda é válido
-      // Por enquanto, vamos assumir que se tem token, está logado.
-      // E decodificar o token para pegar os dados do usuário.
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser(payload);
+        fetchFavoritos(token);
       } catch (e) {
-        // Token inválido, limpa
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
       }
     }
     setIsLoading(false);
-  }, [token]);
+  }, [token, fetchFavoritos]);
 
   const login = async (email, senha) => {
     const response = await fetch(`${API_AUTH_URL}/login`, {
@@ -58,9 +70,39 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    setFavoritos(new Set());
   }, []);
 
-  const value = { user, token, isLoading, login, register, logout };
+  const toggleFavorito = useCallback(async (produtoId) => {
+    if (!token) return;
+    const isFavorito = favoritos.has(produtoId);
+    const method = isFavorito ? 'DELETE' : 'POST';
+    const url = isFavorito ? `${API_FAVORITOS_URL}/${produtoId}` : API_FAVORITOS_URL;
+    
+    const newFavoritos = new Set(favoritos);
+    if (isFavorito) {
+      newFavoritos.delete(produtoId);
+    } else {
+      newFavoritos.add(produtoId);
+    }
+    setFavoritos(newFavoritos);
+    
+    try {
+      await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: method === 'POST' ? JSON.stringify({ produtoId }) : null,
+      });
+    } catch (error) {
+      console.error('Falha ao atualizar favorito:', error);
+      setFavoritos(favoritos); 
+    }
+  }, [token, favoritos]);
+
+  const value = { user, token, isLoading, login, register, logout, favoritos, toggleFavorito };
 
   return (
     <AuthContext.Provider value={value}>

@@ -6,7 +6,7 @@
 }
 
 .filters-sidebar {
-    flex: 0 0 200px; /* Não cresce, não encolhe, base de 200px */
+    flex: 0 0 200px;
 }
 
 .filters-sidebar h4 {
@@ -39,7 +39,7 @@
 }
 
 .product-area {
-    flex-grow: 1; /* Ocupa o resto do espaço */
+    flex-grow: 1;
 }
 
 .search-bar {
@@ -62,5 +62,37 @@
     color: #f44336;
     cursor: pointer;
     font-weight: bold;
-    white-space: nowrap; /* Impede que o texto quebre a linha */
+    white-space: nowrap;
+}
+
+/* Estilos para o botão de favorito */
+.product-card {
+    position: relative;
+}
+
+.favorite-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, color 0.2s;
+    color: #ccc;
+    z-index: 5;
+}
+
+.favorite-button:hover {
+    transform: scale(1.1);
+}
+
+.favorite-button.favorited {
+    color: #f44336;
 }

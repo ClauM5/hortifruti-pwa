@@ -1,9 +1,10 @@
-// Arquivo: frontend/src/pages/HomePage.jsx (Final com Busca e Filtros)
+// Arquivo: frontend/src/pages/HomePage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import '../App.css';
-import './HomePage.css'; // << Novo arquivo de estilo para a Home
+import './HomePage.css';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 
@@ -12,23 +13,21 @@ function HomePage() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(''); // << Estado para o filtro
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const { addToCart } = useCart();
-      
+  const { user, token, toggleFavorito } = useAuth();
+
   const fetchProdutos = useCallback(async () => {
     setLoading(true);
-    // Constrói a URL da API com os parâmetros de busca e filtro
     let url = `${API_BASE_URL}/produtos?`;
-    if (searchTerm) {
-      url += `search=${searchTerm}`;
-    }
-    if (selectedCategory) {
-      url += `${searchTerm ? '&' : ''}categoria=${selectedCategory}`;
-    }
+    if (searchTerm) url += `search=${searchTerm}`;
+    if (selectedCategory) url += `${searchTerm ? '&' : ''}categoria=${selectedCategory}`;
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       const data = await response.json();
       setProdutos(data);
     } catch (error) {
@@ -36,35 +35,12 @@ function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, selectedCategory]); // A função é recriada quando a busca ou o filtro mudam
+  }, [searchTerm, selectedCategory, token]);
 
-  const fetchCategorias = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/categorias`);
-      const data = await response.json();
-      setCategorias(data);
-    } catch (error) {
-      console.error("Erro ao buscar categorias:", error);
-    }
-  };
-      
-  useEffect(() => {
-    fetchCategorias();
-  }, []); // Busca as categorias uma vez quando a página carrega
-
-  useEffect(() => {
-    // Busca os produtos sempre que o termo de busca ou a categoria selecionada mudar
-    const debounceTimer = setTimeout(() => {
-        fetchProdutos();
-    }, 500); // << Debounce: espera 500ms após o usuário parar de digitar para fazer a busca
-
-    return () => clearTimeout(debounceTimer); // Limpa o timer
-  }, [fetchProdutos]);
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('');
-  };
+  const fetchCategorias = async () => { try { const response = await fetch(`${API_BASE_URL}/categorias`); const data = await response.json(); setCategorias(data); } catch (error) { console.error("Erro ao buscar categorias:", error); } };
+  useEffect(() => { fetchCategorias(); }, []);
+  useEffect(() => { const debounceTimer = setTimeout(() => { fetchProdutos(); }, 500); return () => clearTimeout(debounceTimer); }, [fetchProdutos]);
+  const handleClearFilters = () => { setSearchTerm(''); setSelectedCategory(''); };
 
   return (
     <>
@@ -74,52 +50,30 @@ function HomePage() {
       </header>
       
       <div className="store-container">
-        {/* ======================================================= */}
-        {/* >> NOVA BARRA LATERAL DE FILTROS << */}
-        {/* ======================================================= */}
         <aside className="filters-sidebar">
           <h4>Categorias</h4>
           <ul>
-            <li 
-              className={selectedCategory === '' ? 'active' : ''}
-              onClick={() => setSelectedCategory('')}
-            >
-              Todas
-            </li>
-            {categorias.map(cat => (
-              <li 
-                key={cat.id}
-                className={selectedCategory === cat.nome ? 'active' : ''}
-                onClick={() => setSelectedCategory(cat.nome)}
-              >
-                {cat.nome}
-              </li>
-            ))}
+            <li className={selectedCategory === '' ? 'active' : ''} onClick={() => setSelectedCategory('')}>Todas</li>
+            {categorias.map(cat => ( <li key={cat.id} className={selectedCategory === cat.nome ? 'active' : ''} onClick={() => setSelectedCategory(cat.nome)}>{cat.nome}</li> ))}
           </ul>
         </aside>
-
         <main className="product-area">
-          {/* ======================================================= */}
-          {/* >> NOVA BARRA DE BUSCA << */}
-          {/* ======================================================= */}
           <div className="search-bar">
-            <input 
-              type="text" 
-              placeholder="O que você procura hoje?"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {(searchTerm || selectedCategory) && (
-              <button onClick={handleClearFilters} className="clear-button">Limpar Filtros</button>
-            )}
+            <input type="text" placeholder="O que você procura hoje?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            {(searchTerm || selectedCategory) && ( <button onClick={handleClearFilters} className="clear-button">Limpar Filtros</button> )}
           </div>
-
           <div className="product-grid">
-            {loading ? (
-              <p>Carregando produtos...</p>
-            ) : produtos.length > 0 ? (
+            {loading ? <p>Carregando produtos...</p> : produtos.length > 0 ? (
               produtos.map(produto => (
                 <div key={produto.id} className="product-card">
+                  {user && (
+                    <button 
+                      className={`favorite-button ${produto.is_favorito ? 'favorited' : ''}`} 
+                      onClick={() => toggleFavorito(produto.id)}
+                    >
+                      ❤️
+                    </button>
+                  )}
                   <img src={produto.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={produto.nome} className="product-image" />
                   <div className="card-content">
                     <h2 className="product-name">{produto.nome}</h2>
@@ -128,14 +82,11 @@ function HomePage() {
                   </div>
                 </div>
               ))
-            ) : (
-              <p>Nenhum produto encontrado com os filtros selecionados.</p>
-            )}
+            ) : <p>Nenhum produto encontrado com os filtros selecionados.</p>}
           </div>
         </main>
       </div>
     </>
   );
 }
-
 export default HomePage;
