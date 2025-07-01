@@ -1,19 +1,18 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com correção e teste visual)
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { subscribeUserToPush } from '../utils/push-notifications';
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
+const WS_URL = 'wss://hortifruti-backend.onrender.com'; // << LINHA CORRIGIDA
 
 function AccountPage() {
   const { user, token, logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,8 +32,8 @@ function AccountPage() {
   }, [token]);
 
   useEffect(() => {
-    if (!token || pedidos.length === 0) return;
-    const ws = new WebSocket(`${WS_URL.replace('https', 'wss')}?token=${token}`);
+    if (!token || !user) return;
+    const ws = new WebSocket(`${WS_URL}?token=${token}`);
     ws.onopen = () => console.log('Conexão WebSocket aberta na página da conta.');
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -51,7 +50,7 @@ function AccountPage() {
     ws.onerror = (err) => console.error("Erro no WebSocket da conta:", err);
     ws.onclose = () => console.log('Conexão WebSocket da conta fechada.');
     return () => { ws.close(); };
-  }, [token, pedidos.length]);
+  }, [token, user]);
 
   const handleLogout = () => { logout(); navigate('/'); };
   const handleReorder = (itensDoPedido) => {
@@ -66,34 +65,21 @@ function AccountPage() {
     });
   };
 
-  const handleEnableNotifications = async () => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        alert('As notificações já estão ativadas.');
-        await subscribeUserToPush(token);
-    } else if ('Notification' in window && Notification.permission !== 'denied') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            await subscribeUserToPush(token);
-        }
-    } else {
-        alert('As notificações estão bloqueadas no seu navegador. Por favor, altere as permissões do site nas configurações do navegador.');
-    }
-  };
-
   if (isLoading) return <p>Carregando seus dados...</p>;
   if (!user) { return ( <div className="auth-container"> <p>Você precisa estar logado.</p> <button onClick={() => navigate('/login')}>Fazer Login</button> </div> ); }
 
   return (
     <div className="auth-container">
       <div className="account-page">
+        {/* >> TESTE VISUAL << */}
+        <h1 style={{color: 'blue', textAlign: 'center'}}>VERSÃO CORRIGIDA</h1>
+
         <div className="account-header"><h2>Minha Conta</h2><button onClick={handleLogout} className="logout-button">Sair</button></div>
         <p>Olá, <strong>{user.nome}!</strong></p>
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
-          <button onClick={handleEnableNotifications} className="account-link-box notification-button">
-            Ativar Notificações de Pedidos
-          </button>
+          <button onClick={handleEnableNotifications} className="account-link-box notification-button">Ativar Notificações</button>
         </div>
         <div className="order-history">
           <h3>Seus Pedidos</h3>
