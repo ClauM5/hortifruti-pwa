@@ -1,47 +1,76 @@
-/* Arquivo: frontend/src/App.css (Com o novo Sistema de Design) */
+/* Arquivo: frontend/src/App.css (Com Cards de Produto Refinados) */
 :root {
-  /* Paleta de Cores */
-  --primary-color: #388E3C;       /* Verde escuro para ações principais */
-  --primary-color-light: #4CAF50; /* Verde mais claro para destaques */
-  --accent-color: #FF8F00;        /* Laranja/Âmbar para botões de compra */
-  --accent-color-hover: #FFB300;  /* Laranja mais claro para hover */
-  
-  --text-color-dark: #212121;     /* Quase preto para textos principais */
-  --text-color-light: #616161;    /* Cinza para textos secundários */
-  --bg-color: #f5f5f5;            /* Fundo principal bem claro */
-  --card-bg: #ffffff;             /* Fundo dos cards */
-  --border-color: #e0e0e0;        /* Cor das bordas */
-
-  --status-success: #28a745;
-  --status-error: #d32f2f;
-  --status-info: #0288d1;
-  --status-warning: #f57c00;
-
-  /* Tipografia */
-  --font-body: 'Lato', sans-serif;
-  --font-headings: 'Poppins', sans-serif;
-
-  /* UI */
-  --border-radius: 8px;
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  /* ... (As variáveis que já definimos continuam aqui) ... */
+  --primary-color: #388E3C; --primary-color-light: #4CAF50; --accent-color: #FF8F00; --accent-color-hover: #FFB300; --text-color-dark: #212121; --text-color-light: #616161; --bg-color: #f5f5f5; --card-bg: #ffffff; --border-color: #e0e0e0; --status-success: #28a745; --status-error: #d32f2f; --status-info: #0288d1; --status-warning: #f57c00; --font-body: 'Lato', sans-serif; --font-headings: 'Poppins', sans-serif; --border-radius: 8px; --shadow-sm: 0 2px 4px rgba(0,0,0,0.05); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
+body { margin: 0; font-family: var(--font-body); background-color: var(--bg-color); color: var(--text-color-dark); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-headings); color: var(--text-color-dark); }
+.error-message { color: var(--status-error); font-weight: bold; text-align: center; margin: 1rem 0; }
 
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  background-color: var(--bg-color);
-  color: var(--text-color-dark);
+/* REFINAMENTO DO CARD DE PRODUTO */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
 }
-
-h1, h2, h3, h4, h5, h6 {
+.product-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.card-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.product-name {
   font-family: var(--font-headings);
-  color: var(--text-color-dark);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0 0 10px 0;
+  flex-grow: 1;
 }
-
-.error-message {
-  color: var(--status-error);
-  font-weight: bold;
-  text-align: center;
-  margin: 1rem 0;
+.product-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color-dark);
+  margin: 0 0 15px 0;
+}
+.add-to-cart-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 14px;
+  cursor: pointer;
+  font-family: var(--font-headings);
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+.add-to-cart-button:hover:not(:disabled) {
+  background-color: var(--accent-color-hover);
+}
+.add-to-cart-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.add-to-cart-button.added {
+  background-color: var(--status-success);
 }

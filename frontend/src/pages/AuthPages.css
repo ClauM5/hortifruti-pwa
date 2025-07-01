@@ -1,42 +1,26 @@
 /* Arquivo: frontend/src/pages/AuthPages.css */
-.auth-container { display: flex; justify-content: center; align-items: center; padding: 40px; min-height: 80vh; }
-.auth-form { width: 100%; max-width: 400px; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
-.auth-form h2 { margin-bottom: 20px; }
-.auth-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-.auth-form button { width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; }
-.auth-form p { margin-top: 20px; }
-.account-page { width: 100%; max-width: 800px; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.account-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+.auth-container { display: flex; justify-content: center; align-items: flex-start; padding: 2rem 1rem; min-height: 80vh; }
+.auth-form, .account-page { width: 100%; max-width: 450px; padding: 2rem; background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center; }
+.auth-form h2, .account-page h2 { font-weight: 600; margin-bottom: 2rem; }
+.auth-form input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); box-sizing: border-box; font-family: var(--font-body); }
+.auth-form button { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; font-weight: 600; font-family: var(--font-headings); }
+.auth-form p { margin-top: 1.5rem; }
+.account-page { max-width: 800px; text-align: left; }
+.account-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem; }
 .account-header h2 { margin: 0; }
-.logout-button { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-.account-links { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-.account-link-box { display: block; background-color: #f9f9f9; padding: 15px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; text-align: center; transition: background-color 0.2s; }
-.account-link-box:hover { background-color: #f0f0f0; }
-.order-history { margin-top: 30px; text-align: left; }
-.order-summary-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-.order-summary-header { display: flex; justify-content: space-between; align-items: center; }
-.order-summary-body { padding: 15px 0; }
-.order-summary-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 15px; border-top: 1px solid #f0f0f0; }
+.logout-button { background: var(--status-error); color: white; border: none; padding: 8px 12px; border-radius: var(--border-radius); cursor: pointer; font-family: var(--font-headings); font-weight: 600; }
+.account-links { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 2rem 0; }
+.account-link-box { display: block; background-color: var(--bg-color); padding: 15px; border-radius: var(--border-radius); text-decoration: none; color: var(--text-color-dark); font-weight: 600; text-align: center; transition: background-color 0.2s; border: 1px solid var(--border-color); }
+.account-link-box:hover { background-color: #e8e8e8; }
+.notification-button { background-color: var(--status-info); color: white; border: none; width: 100%; cursor: pointer; font-family: var(--font-body); }
+.order-history { margin-top: 2rem; }
+.order-summary-card { border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1rem; margin-bottom: 1rem; }
+.order-summary-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.order-summary-body { padding: 1rem 0; }
+.order-summary-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 1rem; border-top: 1px solid #f0f0f0; }
 .status { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; color: white; text-transform: capitalize; }
-.status-recebido { background-color: #2196F3; }
-.status-em-preparo { background-color: #ff9800; }
-.status-saiu-para-entrega { background-color: #795548; }
-.status-entregue { background-color: #4CAF50; }
-.status-cancelado { background-color: #f44336; }
-/* >> NOVO ESTILO DE STATUS << */
-.status-pronto-para-retirada { background-color: #9c27b0; } /* Roxo */
-.details-button, .reorder-button { border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background-color 0.2s, opacity 0.2s; }
-.details-button { background-color: #007bff; color: white; }
-.details-button:hover { background-color: #0056b3; }
-.reorder-button { background-color: #ff9800; color: white; }
-.reorder-button:hover { background-color: #f57c00; }
-.notification-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-}
-.notification-button:hover {
-    background-color: #0056b3;
-}
+.status-recebido { background-color: var(--status-info); } .status-em-preparo { background-color: var(--status-warning); } .status-saiu-para-entrega { background-color: #795548; } .status-entregue { background-color: var(--status-success); } .status-cancelado { background-color: var(--status-error); } .status-pronto-para-retirada { background-color: #9c27b0; }
+.details-button, .reorder-button { border: none; padding: 8px 12px; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+.details-button { background-color: var(--text-color-light); color: white; }
+.reorder-button { background-color: var(--accent-color); color: white; }
+@media (min-width: 600px) { .account-links { grid-template-columns: repeat(3, 1fr); } }
