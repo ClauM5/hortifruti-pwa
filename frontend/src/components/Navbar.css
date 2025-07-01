@@ -1,59 +1,8 @@
-/* Arquivo: frontend/src/components/Navbar.css (Correção final de responsividade) */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap; /* Permite que os itens quebrem para a linha de baixo se não couberem */
-    gap: 1rem;
-    padding: 1rem;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.navbar-logo {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #4CAF50;
-    text-decoration: none;
-    flex-shrink: 0; /* Impede que o logo encolha */
-}
-
-.navbar-links {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap; /* Permite que os links quebrem a linha se necessário */
-}
-
-.navbar-links a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.cart-link {
-    background-color: #f0f0f0;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-}
-
-/* Regras para telas maiores */
-@media (min-width: 768px) {
-    .navbar {
-        padding: 1rem 2rem;
-        flex-wrap: nowrap; /* Em telas grandes, não quebra a linha */
-    }
-    .navbar-logo {
-        font-size: 1.5rem;
-    }
-    .navbar-links {
-        gap: 1.5rem;
-    }
-    .navbar-links a {
-        font-size: 1rem;
-    }
-}
+/* Arquivo: frontend/src/components/Navbar.css */
+.navbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background-color: var(--card-bg); box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box; }
+.navbar-logo { font-family: var(--font-headings); font-size: 1.3rem; font-weight: 700; color: var(--primary-color); text-decoration: none; flex-shrink: 0; }
+.navbar-links { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.navbar-links a { text-decoration: none; color: var(--text-color-light); font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
+.navbar-links a:hover { color: var(--primary-color); }
+.cart-link { background-color: #f0f0f0; padding: 0.5rem 1rem; border-radius: 20px; }
+@media (min-width: 768px) { .navbar { padding: 1rem 2rem; flex-wrap: nowrap; } .navbar-logo { font-size: 1.5rem; } .navbar-links { gap: 1.5rem; } .navbar-links a { font-size: 1rem; } }
