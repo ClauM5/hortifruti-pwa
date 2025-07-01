@@ -1,18 +1,20 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Com correção e teste visual)
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com a função que faltava)
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { subscribeUserToPush } from '../utils/push-notifications'; // Importa a função de inscrição
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
-const WS_URL = 'wss://hortifruti-backend.onrender.com'; // << LINHA CORRIGIDA
+const WS_URL = 'wss://hortifruti-backend.onrender.com';
 
 function AccountPage() {
   const { user, token, logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,21 +67,44 @@ function AccountPage() {
     });
   };
 
+  // =======================================================
+  // >> A FUNÇÃO QUE ESTAVA FALTANDO <<
+  // =======================================================
+  const handleEnableNotifications = async () => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Seu navegador não suporta notificações push.');
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        alert('As notificações já estão ativadas.');
+        await subscribeUserToPush(token);
+    } else if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            await subscribeUserToPush(token);
+        }
+    } else {
+        alert('As notificações estão bloqueadas. Por favor, altere as permissões do site nas configurações do seu navegador.');
+    }
+  };
+
+
   if (isLoading) return <p>Carregando seus dados...</p>;
   if (!user) { return ( <div className="auth-container"> <p>Você precisa estar logado.</p> <button onClick={() => navigate('/login')}>Fazer Login</button> </div> ); }
 
   return (
     <div className="auth-container">
       <div className="account-page">
-        {/* >> TESTE VISUAL << */}
-        <h1 style={{color: 'blue', textAlign: 'center'}}>VERSÃO CORRIGIDA</h1>
-
         <div className="account-header"><h2>Minha Conta</h2><button onClick={handleLogout} className="logout-button">Sair</button></div>
         <p>Olá, <strong>{user.nome}!</strong></p>
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
-          <button onClick={handleEnableNotifications} className="account-link-box notification-button">Ativar Notificações</button>
+          {/* Este botão agora tem uma função para chamar */}
+          <button onClick={handleEnableNotifications} className="account-link-box notification-button">
+            Ativar Notificações de Pedidos
+          </button>
         </div>
         <div className="order-history">
           <h3>Seus Pedidos</h3>
