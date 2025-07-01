@@ -1,83 +1,35 @@
-/* Arquivo: frontend/src/components/BannerCarousel.css (Com correção de responsividade) */
+/* Arquivo: frontend/src/components/BannerCarousel.css (Com correção final) */
 
 .carousel-container {
     width: 100%;
     margin-bottom: 2rem;
-    /* Vamos mover o arredondamento e o overflow para o container interno do swiper */
+    position: relative; /* << ESSENCIAL para conter elementos filhos posicionados de forma absoluta */
 }
 
-/* ======================================================= */
-/* >> A CORREÇÃO ESTÁ AQUI << */
-/* ======================================================= */
-/* Forçamos o container principal da biblioteca Swiper a esconder qualquer
-   conteúdo que vaze e a ter as bordas arredondadas. */
 .carousel-container .swiper {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-
 .swiper-slide {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 7; /* Um pouco mais alto para mobile */
+    aspect-ratio: 16 / 8; /* Um pouco mais alto para mobile */
     background-color: #f0f0f0;
 }
 
-.swiper-slide.clickable {
-    cursor: pointer;
-}
-
-.swiper-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.banner-text {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    color: white;
-    padding: 2rem 1.5rem 1.5rem;
-    box-sizing: border-box;
-}
-
-.banner-text h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.5rem;
-}
-
-.banner-text p {
-    margin: 0;
-    font-size: 1rem;
-}
-
-/* Customização dos botões e paginação do Swiper */
-.swiper-button-next, .swiper-button-prev {
-    color: white;
-    --swiper-navigation-size: 30px; /* Diminui um pouco o tamanho das setas */
-}
-
-.swiper-pagination-bullet-active {
-    background-color: white;
-}
-
+.swiper-slide.clickable { cursor: pointer; }
+.swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+.banner-text { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); color: white; padding: 2rem 1.5rem 1.5rem; box-sizing: border-box; }
+.banner-text h2 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+.banner-text p { margin: 0; font-size: 1rem; }
+.swiper-button-next, .swiper-button-prev { color: white; --swiper-navigation-size: 30px; }
+.swiper-pagination-bullet-active { background-color: white; }
 
 /* Regra para telas maiores */
 @media (min-width: 768px) {
-    .swiper-slide {
-        aspect-ratio: 16 / 6;
-    }
-
-    .banner-text h2 {
-        font-size: 2rem;
-    }
-
-    .banner-text p {
-        font-size: 1.2rem;
-    }
+    .swiper-slide { aspect-ratio: 16 / 6; }
+    .banner-text h2 { font-size: 2rem; }
+    .banner-text p { font-size: 1.2rem; }
 }
