@@ -1,30 +1,17 @@
-// Arquivo: frontend/src/pages/OrderDetailPage.jsx (Adaptado para Retirada na Loja)
-
+// Arquivo: frontend/src/pages/OrderDetailPage.jsx (Com WS_URL corrigido)
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './OrderDetailPage.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
-const WS_URL = 'wss://hortifruti-backend.onrender.com';
+const WS_URL = 'wss://hortifruti-backend.onrender.com'; // << GARANTINDO QUE ESTÁ AQUI
 
 const StatusTimeline = ({ status }) => {
-    // Adicionamos o novo status à lista
     const statuses = ['Recebido', 'Em Preparo', 'Pronto para retirada', 'Saiu para Entrega', 'Entregue'];
-    // Lógica para lidar com status que não estão na timeline principal (ex: Cancelado)
     const displayStatus = statuses.includes(status) ? status : 'Recebido';
     const currentStatusIndex = statuses.indexOf(displayStatus);
-
-    return (
-        <div className="timeline-container">
-            {statuses.map((s, index) => (
-                <div key={s} className={`timeline-step ${index <= currentStatusIndex ? 'completed' : ''}`}>
-                    <div className="timeline-dot"></div>
-                    <div className="timeline-label">{s}</div>
-                </div>
-            ))}
-        </div>
-    );
+    return ( <div className="timeline-container"> {statuses.map((s, index) => ( <div key={s} className={`timeline-step ${index <= currentStatusIndex ? 'completed' : ''}`}> <div className="timeline-dot"></div> <div className="timeline-label">{s}</div> </div> ))} </div> );
 };
 
 function OrderDetailPage() {
@@ -61,7 +48,6 @@ function OrderDetailPage() {
         return () => ws.close();
     }, [token, pedidoId]);
 
-
     if (loading) return <p>Carregando detalhes do pedido...</p>;
     if (error) return <p className="error-message">{error}</p>;
     if (!pedido) return <p>Pedido não encontrado.</p>;
@@ -70,33 +56,13 @@ function OrderDetailPage() {
         <div className="order-detail-container">
             <button onClick={() => navigate('/minha-conta')} className="back-button">&larr; Voltar para Meus Pedidos</button>
             <h2>Detalhes do Pedido #{pedido.id}</h2>
-
-            <div className="order-detail-card status-card">
-                <h3>Status do Pedido</h3>
-                <StatusTimeline status={pedido.status} />
-            </div>
-
-            <div className="order-detail-card items-card">
-                <h3>Itens do Pedido</h3>
-                <ul>{pedido.itens.map(item => (<li key={item.id}><span>{item.quantidade}x {item.produto_nome}</span><span>R$ {(Number(item.preco_unitario) * item.quantity).toFixed(2).replace('.', ',')}</span></li>))}</ul>
-                <div className="order-total"><strong>Total: R$ {Number(pedido.valor_total).toFixed(2).replace('.', ',')}</strong></div>
-            </div>
-
+            <div className="order-detail-card status-card"> <h3>Status do Pedido</h3> <StatusTimeline status={pedido.status} /> </div>
+            <div className="order-detail-card items-card"> <h3>Itens do Pedido</h3> <ul>{pedido.itens.map(item => (<li key={item.id}><span>{item.quantidade}x {item.produto_nome}</span><span>R$ {(Number(item.preco_unitario) * item.quantity).toFixed(2).replace('.', ',')}</span></li>))}</ul> <div className="order-total"><strong>Total: R$ {Number(pedido.valor_total).toFixed(2).replace('.', ',')}</strong></div> </div>
             <div className="order-detail-card info-card">
                 <h3>Informações do Pedido</h3>
                 <p><strong>Cliente:</strong> {pedido.nome_cliente}</p>
                 <p><strong>Pagamento:</strong> {pedido.metodo_pagamento}</p>
-                
-                {/* ======================================================= */}
-                {/* >> LÓGICA CONDICIONAL PARA ENTREGA/RETIRADA << */}
-                {/* ======================================================= */}
-                {pedido.endereco_cliente === 'Retirada na Loja' ? (
-                    <div className="pickup-info-details">
-                        <p><strong>Modalidade:</strong> Retirada na Loja</p>
-                    </div>
-                ) : (
-                    <p><strong>Endereço de Entrega:</strong> {pedido.endereco_cliente}</p>
-                )}
+                {pedido.endereco_cliente === 'Retirada na Loja' ? ( <div className="pickup-info-details"><p><strong>Modalidade:</strong> Retirada na Loja</p></div> ) : ( <p><strong>Endereço de Entrega:</strong> {pedido.endereco_cliente}</p> )}
             </div>
         </div>
     );
