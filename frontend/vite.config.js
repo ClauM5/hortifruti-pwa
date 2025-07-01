@@ -9,9 +9,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.js',
+      injectRegister: 'auto',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+      },
       devOptions: {
         enabled: true
       },
@@ -25,17 +26,17 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'pwa-192x192.png', // << CORRIGIDO
+            src: 'pwa-192x192.png', // << NOME CORRETO
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png', // << CORRIGIDO
+            src: 'pwa-512x512.png', // << NOME CORRETO
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png', // << CORRIGIDO
+            src: 'pwa-512x512.png', // << NOME CORRETO
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
