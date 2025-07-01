@@ -1,4 +1,4 @@
-// Arquivo: frontend/vite.config.js
+// Arquivo: frontend/vite.config.js (Com nomes dos ícones corrigidos)
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -9,29 +9,36 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Configuração para o nosso service worker personalizado
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'sw.js', // Nome do nosso service worker
+      filename: 'sw.js',
       devOptions: {
-        enabled: true // Habilita o SW em modo de desenvolvimento
+        enabled: true
       },
       manifest: {
-        // ... (seu manifesto PWA existente)
         name: 'Hortifruti Frescor',
         short_name: 'Hortifruti',
         description: 'Seu app de delivery de hortifruti.',
         theme_color: '#4CAF50',
+        background_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
         icons: [
           {
-            src: 'icon-192x192.png',
+            src: 'pwa-192x192.png', // << CORRIGIDO
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icon-512x512.png',
+            src: 'pwa-512x512.png', // << CORRIGIDO
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png', // << CORRIGIDO
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
