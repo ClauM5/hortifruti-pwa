@@ -1,0 +1,105 @@
+/* Arquivo: frontend/src/pages/AdminLayout.css */
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  background-color: #1e293b; /* Azul escuro corporativo */
+  color: #e2e8f0; /* Texto claro */
+  padding: 1.5rem;
+  flex-shrink: 0;
+}
+
+.admin-logo {
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-align: center;
+  margin: 0 0 3rem 0;
+  color: #ffffff;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.admin-nav a {
+  color: #cbd5e1; /* Cinza claro para links */
+  text-decoration: none;
+  font-family: var(--font-headings);
+  font-weight: 500;
+  padding: 0.8rem 1rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.admin-nav a:hover {
+  background-color: #334155; /* Fundo mais claro no hover */
+  color: #ffffff;
+}
+
+.admin-nav a.active {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.admin-logout-button {
+  background-color: transparent;
+  border: 1px solid var(--status-error);
+  color: var(--status-error);
+  padding: 0.8rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.admin-logout-button:hover {
+  background-color: var(--status-error);
+  color: #ffffff;
+}
+
+.admin-main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Responsividade para o menu */
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    flex-grow: 0;
+  }
+  .admin-logo {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .admin-logout-button {
+    display: none; /* Esconde o botão de sair principal no mobile */
+  }
+}
