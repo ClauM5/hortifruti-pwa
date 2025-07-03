@@ -17,7 +17,7 @@ const webpush = require('web-push');
 
 // Inicialização do App Express
 const app = express();
-const server = http.createServer(app);
+
 
 // --- CONFIGURAÇÕES GLOBAIS E MIDDLEWARES ---
 const PORT = process.env.PORT || 3001;
@@ -115,49 +115,34 @@ app.post('/api/cupons', checkPassword, async (req, res) => { const { codigo, tip
 app.put('/api/cupons/:id', checkPassword, async (req, res) => { const { id } = req.params; const { codigo, tipo_desconto, valor, data_validade, ativo, usos_maximos } = req.body; try { const r = await pool.query('UPDATE cupons SET codigo = $1, tipo_desconto = $2, valor = $3, data_validade = $4, ativo = $5, usos_maximos = $6 WHERE id = $7 RETURNING *', [codigo.toUpperCase(), tipo_desconto, valor, data_validade || null, ativo, usos_maximos || null, id]); res.json(r.rows[0]); } catch (err) { if (err.code === '23505') return res.status(400).json({ message: 'Código já existe.' }); res.status(500).send('Erro'); }});
 app.delete('/api/cupons/:id', checkPassword, async (req, res) => { const { id } = req.params; try { await pool.query('DELETE FROM cupons WHERE id = $1', [id]); res.status(204).send(); } catch (err) { res.status(500).send('Erro'); }});
 
-// Arquivo: backend/index.js - PARTE 3 DE 3
+// Arquivo: backend/index.js - PARTE 3 DE 3 (Corrigida)
 
-// --- LÓGICA WEBSOCKET E PUSH NOTIFICATIONS ---
-async function sendPushNotification(userId, messagePayload) {
-    if (!process.env.VAPID_PUBLIC_KEY) return; // Não tenta enviar se as chaves não estiverem configuradas
-    try {
-        const subResult = await pool.query('SELECT subscription_object FROM notificacao_subscriptions WHERE usuario_id = $1', [userId]);
-        if (subResult.rows.length > 0) {
-            const subscription = subResult.rows[0].subscription_object;
-            const payload = JSON.stringify({
-                title: 'Hortifruti Frescor',
-                body: messagePayload
-            });
-            await webpush.sendNotification(subscription, payload);
-        }
-    } catch (error) {
-        if (error.statusCode === 410) { // Se a inscrição expirou, remove do banco
-            await pool.query('DELETE FROM notificacao_subscriptions WHERE usuario_id = $1', [userId]);
-        } else {
-            console.error('Erro ao enviar push notification:', error);
-        }
-    }
-}
+// --- LÓGICA WEBSOCKET E INICIALIZAÇÃO DO SERVIDOR ---
 
+// 1. Cria o servidor HTTP a partir do nosso app Express
+const server = http.createServer(app);
+
+// 2. CRIA o servidor WebSocket (wss) e o "anexa" ao servidor HTTP
+const wss = new WebSocket.Server({ server });
+
+// 3. Agora que o 'wss' existe, podemos usá-lo
 const userConnections = new Map();
 const adminConnections = new Set();
 
 wss.on('connection', (ws, req) => {
     const parameters = new URL(req.url, `http://${req.headers.host}`).searchParams;
     const token = parameters.get('token');
-    if (token) { // É um cliente logado
+    if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
                 console.error('Erro de verificação do JWT no WebSocket:', err.message);
                 ws.close();
             } else {
-                console.log(`Cliente (ID: ${user.id}) conectado ao WebSocket.`);
                 userConnections.set(user.id, ws);
                 ws.userId = user.id;
             }
         });
-    } else { // É um admin
-        console.log('Admin conectado ao WebSocket.');
+    } else {
         adminConnections.add(ws);
     }
     ws.on('close', () => {
@@ -168,6 +153,24 @@ wss.on('connection', (ws, req) => {
         }
     });
 });
+
+async function sendPushNotification(userId, messagePayload) {
+    if (!process.env.VAPID_PUBLIC_KEY) return;
+    try {
+        const subResult = await pool.query('SELECT subscription_object FROM notificacao_subscriptions WHERE usuario_id = $1', [userId]);
+        if (subResult.rows.length > 0) {
+            const subscription = subResult.rows[0].subscription_object;
+            const payload = JSON.stringify({ title: 'Hortifruti Frescor', body: messagePayload });
+            await webpush.sendNotification(subscription, payload);
+        }
+    } catch (error) {
+        if (error.statusCode === 410) {
+            await pool.query('DELETE FROM notificacao_subscriptions WHERE usuario_id = $1', [userId]);
+        } else {
+            console.error('Erro ao enviar push notification:', error);
+        }
+    }
+}
 
 function sendMessageToUser(userId, message) {
     const connection = userConnections.get(userId);
@@ -185,8 +188,7 @@ function broadcastToAdmins(message) {
     }
 }
 
-
-// --- INICIALIZAÇÃO DO SERVIDOR ---
+// 4. INICIALIZAÇÃO FINAL DO SERVIDOR
 server.listen(PORT, () => {
   console.log(`Servidor Híbrido rodando na porta ${PORT}`);
 });
