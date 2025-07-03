@@ -1,13 +1,9 @@
-// Arquivo: frontend/src/App.jsx (Versão Final com Rotas Corretas)
+// Arquivo: frontend/src/App.jsx
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './pages/AdminLayout';
-
-// Páginas
 import HomePage from './pages/HomePage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
@@ -17,26 +13,20 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-
-// Provedores de Contexto
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
-
-// Estilos
 import './App.css';
 
-// Componentes REAIS do Admin que já construímos
+// Importa os componentes REAIS do Admin
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
+import AdminPedidos from './components/admin/AdminPedidos'; // << Importa o componente real
 
-// Componentes placeholder para as seções restantes
-const AdminPedidos = () => <div><h2>Gerenciar Pedidos</h2><p>Aqui você verá a lista de pedidos.</p></div>;
+// Placeholders para o que ainda falta
 const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
 const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
 
-
-// Componente "Guardião" para proteger as rotas do admin
 const ProtectedAdminRoute = ({ children }) => {
   const isAdminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
   return isAdminLoggedIn ? children : <Navigate to="/admin/login" replace />;
@@ -44,12 +34,10 @@ const ProtectedAdminRoute = ({ children }) => {
 
 function App() {
   return (
-    // O <Router> agora é o componente mais externo
-    <Router>
-      <AuthProvider>
-        <CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Router>
           <Routes>
-            {/* Rotas dos Clientes */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="carrinho" element={<CartPage />} />
@@ -60,28 +48,20 @@ function App() {
               <Route path="meus-favoritos" element={<FavoritesPage />} />
               <Route path="pedido/:id" element={<OrderDetailPage />} />
             </Route>
-
-            {/* Rota de Login do Admin */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
-            
-            {/* Rotas do Painel de Admin */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
               <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="pedidos" element={<AdminPedidos />} />
-              
-              {/* Usando os componentes reais que já construímos */}
+              <Route path="pedidos" element={<AdminPedidos />} /> {/* << USA O COMPONENTE REAL */}
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="categorias" element={<AdminCategorias />} />
-              
-              {/* Usando os placeholders para o que ainda falta */}
               <Route path="banners" element={<AdminBanners />} />
               <Route path="cupons" element={<AdminCupons />} />
             </Route>
           </Routes>
-        </CartProvider>
-      </AuthProvider>
-    </Router>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

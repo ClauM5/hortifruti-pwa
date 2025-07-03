@@ -1,0 +1,82 @@
+/* Arquivo: frontend/src/components/admin/AdminPedidos.css */
+
+.order-list-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.order-card-admin {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-color);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.order-card-header h4 {
+    margin: 0;
+    font-family: var(--font-headings);
+    font-size: 1.2rem;
+}
+
+.order-card-header span {
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+}
+
+.order-card-body {
+    padding: 1.5rem;
+}
+
+.order-card-body p {
+    margin: 0 0 0.75rem 0;
+}
+
+.item-list-admin {
+    list-style-type: '- ';
+    padding-left: 1rem;
+}
+
+.order-card-footer-admin {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.order-total-admin {
+    font-family: var(--font-headings);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.order-status-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-status-control label {
+    font-weight: 600;
+}
+
+.order-status-control select {
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #ccc;
+    font-weight: bold;
+    background-color: #fff;
+}
