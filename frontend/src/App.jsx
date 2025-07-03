@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/App.jsx (Com a Ordem de Provedores Corrigida Definitivamente)
+// Arquivo: frontend/src/App.jsx (Versão Final, Corrigida e Sincronizada)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import AddressPage from './pages/AddressPage';
 
 // Provedores de Contexto
 import { CartProvider } from './context/CartContext';
@@ -25,13 +26,14 @@ import { AuthProvider } from './context/AuthContext';
 // Estilos
 import './App.css';
 
-// Componentes Reais do Admin
-import AdminDashboard from './components/admin/AdminDashboard';
+// --- Componentes do Admin ---
+// Componentes REAIS que já construímos
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
-import AdminPedidos from './components/admin/AdminPedidos';
 
-// Placeholders para o que ainda falta
+// Componentes placeholder para as seções que AINDA VAMOS CONSTRUIR
+const AdminDashboard = () => <div><h2>Dashboard</h2><p>Visão geral do seu negócio.</p></div>;
+const AdminPedidos = () => <div><h2>Gerenciar Pedidos</h2><p>Aqui você verá a lista de pedidos.</p></div>;
 const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
 const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
 
@@ -44,7 +46,7 @@ const ProtectedAdminRoute = ({ children }) => {
 
 function App() {
   return (
-    // O <Router> é o componente mais externo, envolvendo todos os outros.
+    // O <Router> é o componente mais externo
     <Router>
       <AuthProvider>
         <CartProvider>
@@ -58,19 +60,24 @@ function App() {
               <Route path="register" element={<RegisterPage />} />
               <Route path="minha-conta" element={<AccountPage />} />
               <Route path="meus-favoritos" element={<FavoritesPage />} />
+              <Route path="meus-enderecos" element={<AddressPage />} />
               <Route path="pedido/:id" element={<OrderDetailPage />} />
             </Route>
 
             {/* Rota de Login do Admin */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
             
-            {/* Rotas do Painel de Admin com Layout e Proteção */}
+            {/* Rotas do Painel de Admin */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
               <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="pedidos" element={<AdminPedidos />} />
+              
+              {/* Usando os componentes reais que já construímos */}
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="categorias" element={<AdminCategorias />} />
+              
+              {/* Usando os placeholders para o que ainda falta */}
               <Route path="banners" element={<AdminBanners />} />
               <Route path="cupons" element={<AdminCupons />} />
             </Route>
