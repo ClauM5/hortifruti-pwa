@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/App.jsx (Com a ordem dos Provedores corrigida)
+// Arquivo: frontend/src/App.jsx (Versão Final com Rotas Corretas)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -25,20 +25,22 @@ import { AuthProvider } from './context/AuthContext';
 // Estilos
 import './App.css';
 
+// Componentes REAIS do Admin que já construímos
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminCategorias from './components/admin/AdminCategorias';
+import AdminProdutos from './components/admin/AdminProdutos';
+
+// Componentes placeholder para as seções restantes
+const AdminPedidos = () => <div><h2>Gerenciar Pedidos</h2><p>Aqui você verá a lista de pedidos.</p></div>;
+const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
+const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
+
+
 // Componente "Guardião" para proteger as rotas do admin
 const ProtectedAdminRoute = ({ children }) => {
   const isAdminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
   return isAdminLoggedIn ? children : <Navigate to="/admin/login" replace />;
 };
-
-// Componentes placeholder do admin (iremos substituí-los)
-const AdminDashboard = () => <div><h2>Dashboard</h2><p>Visão geral do seu negócio.</p></div>;
-const AdminPedidos = () => <div><h2>Gerenciar Pedidos</h2><p>Aqui você verá a lista de pedidos.</p></div>;
-const AdminProdutos = () => <div><h2>Gerenciar Produtos</h2><p>Aqui você gerenciará seus produtos.</p></div>;
-const AdminCategorias = () => <div><h2>Gerenciar Categorias</h2><p>Aqui você gerenciará as categorias.</p></div>;
-const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
-const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
-
 
 function App() {
   return (
@@ -67,8 +69,12 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="pedidos" element={<AdminPedidos />} />
+              
+              {/* Usando os componentes reais que já construímos */}
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="categorias" element={<AdminCategorias />} />
+              
+              {/* Usando os placeholders para o que ainda falta */}
               <Route path="banners" element={<AdminBanners />} />
               <Route path="cupons" element={<AdminCupons />} />
             </Route>
