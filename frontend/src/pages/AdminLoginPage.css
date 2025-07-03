@@ -1,0 +1,58 @@
+/* Arquivo: frontend/src/pages/AdminLoginPage.css */
+
+.admin-login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    min-height: 80vh;
+    text-align: center;
+}
+
+.admin-login-container h2 {
+    font-family: var(--font-headings);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.admin-login-container p {
+    color: var(--text-color-light);
+    margin-bottom: 2rem;
+}
+
+.admin-input {
+    width: 100%;
+    max-width: 350px;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.admin-button {
+    width: 100%;
+    max-width: 380px;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-headings);
+}
+
+.admin-button:hover {
+    opacity: 0.9;
+}
+
+.error-message {
+    color: var(--status-error);
+    font-weight: bold;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
