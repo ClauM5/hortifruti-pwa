@@ -1,0 +1,55 @@
+/* Arquivo: frontend/src/components/admin/AdminCategorias.css */
+
+.admin-section-container {
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-section-container h2 {
+    margin-top: 0;
+}
+
+.admin-section-container p {
+    color: var(--text-color-light);
+    margin-bottom: 2rem;
+}
+
+.category-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.category-form input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    min-width: 200px;
+}
+
+.category-list-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.category-item-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.category-item-admin span {
+    font-weight: 600;
+}
