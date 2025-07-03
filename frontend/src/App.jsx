@@ -1,9 +1,13 @@
-// Arquivo: frontend/src/App.jsx (Usando o componente AdminCategorias)
+// Arquivo: frontend/src/App.jsx (Versão Final com Admin Refatorado)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './pages/AdminLayout';
+
+// Páginas Públicas e de Cliente
 import HomePage from './pages/HomePage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
@@ -12,25 +16,30 @@ import AccountPage from './pages/AccountPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
+
+// Página de Login do Admin
 import AdminLoginPage from './pages/AdminLoginPage';
+
+// NOVOS Componentes das Seções do Admin
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminPedidos from './components/admin/AdminPedidos';
+import AdminProdutos from './components/admin/AdminProdutos';
+import AdminCategorias from './components/admin/AdminCategorias';
+import AdminBanners from './components/admin/AdminBanners';
+import AdminCupons from './components/admin/AdminCupons';
+
+
+// Provedores de Contexto
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+
 import './App.css';
 
-// Importa o novo componente real
-import AdminCategorias from './components/admin/AdminCategorias';
-
+// Componente "Guardião" para proteger as rotas do admin
 const ProtectedAdminRoute = ({ children }) => {
   const isAdminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
-  return isAdminLoggedIn ? children : <Navigate to="/admin/login" />;
+  return isAdminLoggedIn ? children : <Navigate to="/admin/login" replace />;
 };
-
-// Componentes placeholder para as seções restantes
-const AdminDashboard = () => <div><h2>Dashboard</h2><p>Visão geral do seu negócio.</p></div>;
-const AdminPedidos = () => <div><h2>Gerenciar Pedidos</h2><p>Aqui você verá a lista de pedidos.</p></div>;
-const AdminProdutos = () => <div><h2>Gerenciar Produtos</h2><p>Aqui você gerenciará seus produtos.</p></div>;
-const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
-const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
 
 function App() {
   return (
@@ -38,6 +47,7 @@ function App() {
       <CartProvider>
         <Router>
           <Routes>
+            {/* Rotas dos Clientes */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="carrinho" element={<CartPage />} />
@@ -49,13 +59,17 @@ function App() {
               <Route path="pedido/:id" element={<OrderDetailPage />} />
             </Route>
 
+            {/* Rota de Login do Admin */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
             
+            {/* Rotas do Painel de Admin com Layout e Proteção */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
+              {/* Redireciona /admin para /admin/dashboard */}
+              <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="pedidos" element={<AdminPedidos />} />
               <Route path="produtos" element={<AdminProdutos />} />
-              <Route path="categorias" element={<AdminCategorias />} /> {/* <-- USA O COMPONENTE REAL */}
+              <Route path="categorias" element={<AdminCategorias />} />
               <Route path="banners" element={<AdminBanners />} />
               <Route path="cupons" element={<AdminCupons />} />
             </Route>
