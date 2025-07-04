@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/components/admin/AdminDashboard.jsx
+// Arquivo: frontend/src/components/admin/AdminDashboard.jsx (Corrigido)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import './AdminDashboard.css';
@@ -77,7 +77,9 @@ function AdminDashboard() {
           <span>Total</span>
           <span>Status</span>
         </div>
-        {stats.ultimospedidos.map(pedido => (
+        
+        {/* CORREÇÃO APLICADA AQUI: de 'ultimospedidos' para 'ultimosPedidos' */}
+        {stats.ultimosPedidos && stats.ultimosPedidos.map(pedido => (
           <div key={pedido.id} className="recent-order-item">
             <span>#{pedido.id}</span>
             <span>{pedido.nome_cliente}</span>
@@ -85,6 +87,7 @@ function AdminDashboard() {
             <span><span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span></span>
           </div>
         ))}
+
       </div>
     </div>
   );
