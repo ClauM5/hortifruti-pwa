@@ -1,59 +1,83 @@
-// Arquivo: frontend/src/components/admin/AdminPedidos.jsx
+// Arquivo: frontend/src/components/admin/AdminPedidos.jsx (Corrigido)
 
-import React, { useState, useEffect } from 'react';
-import './AdminPedidos.css'; // Criaremos este arquivo de estilo a seguir
+import React, { useState, useEffect, useCallback } from 'react';
+import './AdminPedidos.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 
 function AdminPedidos() {
   const [pedidos, setPedidos] = useState([]);
+  const [produtos, setProdutos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [pedidoExpandido, setPedidoExpandido] = useState(null);
 
-  const fetchPedidos = async () => {
+  // CORREÇÃO: Pega a senha do sessionStorage
+  const adminToken = sessionStorage.getItem('admin_password');
+
+  const fetchInitialData = useCallback(async () => {
+    setIsLoading(true);
     setError('');
     try {
-      const adminPassword = sessionStorage.getItem('admin_password');
-      const response = await fetch(`${API_BASE_URL}/pedidos`, {
-        headers: {
-          'Authorization': adminPassword,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Falha ao buscar pedidos. Verifique a senha de admin.');
-      }
-      const data = await response.json();
-      setPedidos(data);
+      const headers = { 'authorization': adminToken };
+      const [pedidosRes, produtosRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/pedidos`, { headers }),
+        fetch(`${API_BASE_URL}/produtos`)
+      ]);
+      if (!pedidosRes.ok) throw new Error('Falha ao buscar pedidos. Sua sessão de admin pode ter expirado. Faça o login novamente.');
+      if (!produtosRes.ok) throw new Error('Falha ao buscar produtos.');
+      
+      const pedidosData = await pedidosRes.json();
+      const produtosData = await produtosRes.json();
+      setPedidos(pedidosData);
+      setProdutos(produtosData);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [adminToken]);
 
   useEffect(() => {
-    fetchPedidos();
-  }, []);
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  const handleStatusChange = async (pedidoId, novoStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/pedidos/${pedidoId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': adminToken
+        },
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (!response.ok) throw new Error('Falha ao atualizar status.');
+      
+      setPedidos(prev => prev.map(p => p.id === pedidoId ? { ...p, status: novoStatus } : p));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const getProductNameById = (id) => {
+    const product = produtos.find(p => p.id === id);
+    return product ? product.nome : `Produto ID ${id}`;
+  };
 
   const handleToggleExpand = (pedidoId) => {
     setPedidoExpandido(pedidoExpandido === pedidoId ? null : pedidoId);
   };
 
-  if (isLoading) {
-    return <div className="admin-pedidos-container"><h2>Gerenciar Pedidos</h2><p>Carregando pedidos...</p></div>;
-  }
-
-  if (error) {
-    return <div className="admin-pedidos-container"><h2>Gerenciar Pedidos</h2><p className="error-message">{error}</p></div>;
-  }
-
   return (
-    <div className="admin-pedidos-container">
+    <div className="admin-section-container">
       <h2>Gerenciar Pedidos</h2>
+      <p>Acompanhe e atualize o status dos pedidos recebidos.</p>
+      
+      {error && <p className="error-message">{error}</p>}
+      
       <div className="pedidos-list">
-        {pedidos.length > 0 ? (
+        {isLoading ? <p>Carregando pedidos...</p> : pedidos.length > 0 ? (
           pedidos.map((pedido) => (
             <div key={pedido.id} className="pedido-card">
               <div className="pedido-card-header" onClick={() => handleToggleExpand(pedido.id)}>
@@ -73,7 +97,7 @@ function AdminPedidos() {
                     <div>
                         <h4>Itens do Pedido:</h4>
                         <ul>
-                            {pedido.itens.map(item => (
+                            {pedido.itens?.map(item => (
                                 <li key={item.id}>
                                     {item.quantidade}x {item.produto_nome}
                                 </li>
@@ -89,6 +113,19 @@ function AdminPedidos() {
                   </div>
                 </div>
               )}
+              <div className="pedido-card-footer-admin">
+                  <div className="order-status-control">
+                      <label>Mudar Status:</label>
+                      <select value={pedido.status} onChange={(e) => handleStatusChange(pedido.id, e.target.value)}>
+                          <option value="Recebido">Recebido</option>
+                          <option value="Em Preparo">Em Preparo</option>
+                          <option value="Pronto para retirada">Pronto para retirada</option>
+                          <option value="Saiu para Entrega">Saiu para Entrega</option>
+                          <option value="Entregue">Entregue</option>
+                          <option value="Cancelado">Cancelado</option>
+                      </select>
+                  </div>
+              </div>
             </div>
           ))
         ) : (

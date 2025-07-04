@@ -1,8 +1,8 @@
-// Arquivo: frontend/src/pages/AdminLoginPage.jsx
+// Arquivo: frontend/src/pages/AdminLoginPage.jsx (Corrigido)
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminLoginPage.css'; // Importa o novo nome do CSS
+import './AdminLoginPage.css';
 
 function AdminLoginPage() {
   const [senha, setSenha] = useState('');
@@ -12,10 +12,8 @@ function AdminLoginPage() {
   const handleLogin = () => {
     // A senha do admin que está no Render
     if (senha === '102030') {
-      // Salva um item no sessionStorage para "lembrar" que o admin está logado
-      // nesta sessão do navegador.
-      sessionStorage.setItem('admin_logged_in', 'true');
-      // Redireciona para o dashboard do novo painel
+      // CORREÇÃO: Salva a senha real para ser usada como token de admin
+      sessionStorage.setItem('admin_password', senha);
       navigate('/admin/dashboard');
     } else {
       setError('Senha incorreta!');
