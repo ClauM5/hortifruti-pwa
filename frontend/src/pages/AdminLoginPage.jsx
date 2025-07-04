@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/AdminLoginPage.jsx (Corrigido)
+// Arquivo: frontend/src/pages/AdminLoginPage.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +10,8 @@ function AdminLoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    // A senha do admin que está no Render
     if (senha === '102030') {
-      // CORREÇÃO: Salva a senha real para ser usada como token de admin
-      sessionStorage.setItem('admin_password', senha);
+      sessionStorage.setItem('admin_password', senha); // Salva a senha correta
       navigate('/admin/dashboard');
     } else {
       setError('Senha incorreta!');
@@ -24,14 +22,7 @@ function AdminLoginPage() {
     <div className="admin-login-container">
       <h2>Painel de Administrador</h2>
       <p>Por favor, insira a senha para continuar.</p>
-      <input
-        type="password"
-        placeholder="Digite a senha"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-        className="admin-input"
-      />
+      <input type="password" placeholder="Digite a senha" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} className="admin-input"/>
       {error && <p className="error-message">{error}</p>}
       <button onClick={handleLogin} className="admin-button">Entrar</button>
     </div>

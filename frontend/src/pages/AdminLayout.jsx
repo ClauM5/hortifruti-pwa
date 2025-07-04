@@ -1,14 +1,17 @@
-// Arquivo: frontend/src/pages/AdminLayout.jsx
+// Arquivo: frontend/src/pages/AdminLayout.jsx (Logout Corrigido)
 
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import './AdminLayout.css';
 
 function AdminLayout() {
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    // Para simplificar, vamos apenas redirecionar por enquanto.
-    // A lógica de logout real pode ser mais complexa se envolver tokens.
-    window.location.href = '/admin';
+    // Apaga a chave da memória do navegador que diz que o admin está logado
+    sessionStorage.removeItem('admin_password');
+    // Redireciona de volta para a página de login
+    navigate('/admin/login');
   };
 
   return (
