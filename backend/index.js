@@ -31,6 +31,7 @@ const verifyToken = (req, res, next) => { const authHeader = req.headers['author
 // Arquivo: backend/index.js - PARTE 2 DE 3
 
 // --- ROTAS DA APLICAÇÃO ---
+// (Todas as rotas de /api/produtos até /api/cupons/:id continuam aqui, sem alterações)
 app.get('/api/produtos', async (req, res) => { const { search, categoria } = req.query; const authHeader = req.headers['authorization']; const token = authHeader && authHeader.split(' ')[1]; let userId = null; if (token) { try { const decoded = jwt.verify(token, process.env.JWT_SECRET); userId = decoded.id; } catch (e) {} } let query = ` SELECT p.*, array_agg(c.nome) as categorias, CASE WHEN f.produto_id IS NOT NULL THEN true ELSE false END as is_favorito FROM produtos p LEFT JOIN produto_categoria pc ON p.id = pc.produto_id LEFT JOIN categorias c ON pc.categoria_id = c.id LEFT JOIN favoritos f ON p.id = f.produto_id AND f.usuario_id = $1 `; const params = [userId]; const conditions = []; if (search) { params.push(`%${search}%`); conditions.push(`p.nome ILIKE $${params.length}`); } if (categoria) { params.push(categoria); conditions.push(`p.id IN (SELECT produto_id FROM produto_categoria WHERE categoria_id = (SELECT id FROM categorias WHERE nome = $${params.length}))`); } if (conditions.length > 0) { query += ` WHERE ${conditions.join(' AND ')}`; } query += ' GROUP BY p.id, f.produto_id ORDER BY p.id ASC'; try { const result = await pool.query(query, params); res.json(result.rows); } catch (err) { res.status(500).send('Erro no servidor'); }});
 app.get('/api/categorias', async (req, res) => { try { const result = await pool.query('SELECT * FROM categorias ORDER BY nome ASC'); res.json(result.rows); } catch (err) { res.status(500).send('Erro no servidor'); }});
 app.get('/api/banners/ativos', async (req, res) => { try { const result = await pool.query('SELECT * FROM banners WHERE is_active = true ORDER BY ordem ASC'); res.json(result.rows); } catch (err) { res.status(500).send('Erro no servidor'); }});
@@ -66,18 +67,32 @@ app.post('/api/cupons', checkPassword, async (req, res) => { const { codigo, tip
 app.put('/api/cupons/:id', checkPassword, async (req, res) => { const { id } = req.params; const { codigo, tipo_desconto, valor, data_validade, ativo, usos_maximos } = req.body; try { const r = await pool.query('UPDATE cupons SET codigo = $1, tipo_desconto = $2, valor = $3, data_validade = $4, ativo = $5, usos_maximos = $6 WHERE id = $7 RETURNING *', [codigo.toUpperCase(), tipo_desconto, valor, data_validade || null, ativo, usos_maximos || null, id]); res.json(r.rows[0]); } catch (err) { if (err.code === '23505') return res.status(400).json({ message: 'Código já existe.' }); res.status(500).send('Erro'); }});
 app.delete('/api/cupons/:id', checkPassword, async (req, res) => { const { id } = req.params; try { await pool.query('DELETE FROM cupons WHERE id = $1', [id]); res.status(204).send(); } catch (err) { res.status(500).send('Erro'); }});
 
+// ROTA NOVA PARA O DASHBOARD
+app.get('/api/admin/stats', checkPassword, async (req, res) => {
+  try {
+    const totalPedidosResult = await pool.query('SELECT COUNT(*) FROM pedidos');
+    const receitaResult = await pool.query("SELECT SUM(valor_total) FROM pedidos WHERE status = 'Entregue'");
+    const pendentesResult = await pool.query("SELECT COUNT(*) FROM pedidos WHERE status NOT IN ('Entregue', 'Cancelado')");
+    const ultimosPedidosResult = await pool.query('SELECT id, nome_cliente, valor_total, status FROM pedidos ORDER BY data_pedido DESC LIMIT 5');
+
+    res.json({
+      totalPedidos: totalPedidosResult.rows[0].count,
+      receitaTotal: receitaResult.rows[0].sum || 0,
+      pedidosPendentes: pendentesResult.rows[0].count,
+      ultimosPedidos: ultimosPedidosResult.rows,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar estatísticas.' });
+  }
+});
+
 // Arquivo: backend/index.js - PARTE 3 DE 3
 
 // --- LÓGICA WEBSOCKET E PUSH NOTIFICATIONS ---
-
-// 1. CRIA o servidor WebSocket (wss) e o "anexa" ao servidor HTTP principal
 const wss = new WebSocket.Server({ server });
-
-// 2. Define os mapas para guardar as conexões ativas
 const userConnections = new Map();
 const adminConnections = new Set();
 
-// 3. Define o que fazer quando uma nova conexão chega
 wss.on('connection', (ws, req) => {
     const parameters = new URL(req.url, `http://${req.headers.host}`).searchParams;
     const token = parameters.get('token');
@@ -103,7 +118,6 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-// 4. Funções para enviar mensagens
 async function sendPushNotification(userId, messagePayload) {
     if (!process.env.VAPID_PUBLIC_KEY) return;
     try {
@@ -138,7 +152,7 @@ function broadcastToAdmins(message) {
     }
 }
 
-// 5. INICIALIZAÇÃO FINAL DO SERVIDOR
+// --- INICIALIZAÇÃO FINAL DO SERVIDOR ---
 server.listen(PORT, () => {
   console.log(`Servidor Híbrido rodando na porta ${PORT}`);
 });
