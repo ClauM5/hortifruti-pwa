@@ -1,9 +1,13 @@
-// Arquivo: frontend/src/App.jsx (Guardião Corrigido)
+// Arquivo: frontend/src/App.jsx (Com import que faltava)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './pages/AdminLayout';
+
+// Páginas
 import HomePage from './pages/HomePage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
@@ -13,9 +17,16 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import AddressPage from './pages/AddressPage'; // <<--- A LINHA QUE FALTAVA
+
+// Provedores de Contexto
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+
+// Estilos
 import './App.css';
+
+// Componentes do Admin
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
@@ -23,10 +34,10 @@ import AdminPedidos from './components/admin/AdminPedidos';
 import AdminBanners from './components/admin/AdminBanners';
 import AdminCupons from './components/admin/AdminCupons';
 
-// Guardião Corrigido: Agora ele verifica pela existência da senha guardada
+// Componente "Guardião" para proteger as rotas do admin
 const ProtectedAdminRoute = ({ children }) => {
-  const adminPassword = sessionStorage.getItem('admin_password');
-  return adminPassword === '102030' ? children : <Navigate to="/admin/login" replace />;
+  const isAdminLoggedIn = sessionStorage.getItem('admin_password');
+  return isAdminLoggedIn === '102030' ? children : <Navigate to="/admin/login" replace />;
 };
 
 function App() {
