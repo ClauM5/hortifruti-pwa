@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/App.jsx (Com a declaração duplicada removida)
+// Arquivo: frontend/src/App.jsx - PARTE 1 DE 3
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import AddressPage from './pages/AddressPage';
 
 // Provedores de Contexto
 import { CartProvider } from './context/CartContext';
@@ -32,9 +33,8 @@ import AdminProdutos from './components/admin/AdminProdutos';
 import AdminPedidos from './components/admin/AdminPedidos';
 
 // Componentes placeholder para as seções que AINDA VAMOS CONSTRUIR
-// A linha de AdminPedidos que estava aqui foi REMOVIDA
-const AdminBanners = () => <div><h2>Gerenciar Banners</h2><p>Aqui você gerenciará os banners.</p></div>;
-const AdminCupons = () => <div><h2>Gerenciar Cupons</h2><p>Aqui você gerenciará os cupons.</p></div>;
+const AdminBanners = () => <div className="admin-section-container"><h2>Gerenciar Banners</h2><p>Em breve...</p></div>;
+const AdminCupons = () => <div className="admin-section-container"><h2>Gerenciar Cupons</h2><p>Em breve...</p></div>;
 
 
 // Componente "Guardião" para proteger as rotas do admin
@@ -43,12 +43,16 @@ const ProtectedAdminRoute = ({ children }) => {
   return isAdminLoggedIn ? children : <Navigate to="/admin/login" replace />;
 };
 
+// Arquivo: frontend/src/App.jsx - PARTE 2 DE 3
+
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
+    // O <Router> é o componente mais externo, envolvendo todos os outros.
+    <Router>
+      <AuthProvider>
+        <CartProvider>
           <Routes>
+            {/* Rotas dos Clientes */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="carrinho" element={<CartPage />} />
@@ -57,11 +61,14 @@ function App() {
               <Route path="register" element={<RegisterPage />} />
               <Route path="minha-conta" element={<AccountPage />} />
               <Route path="meus-favoritos" element={<FavoritesPage />} />
+              <Route path="meus-enderecos" element={<AddressPage />} />
               <Route path="pedido/:id" element={<OrderDetailPage />} />
             </Route>
 
+            {/* Rota de Login do Admin */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
             
+            {/* Rotas do Painel de Admin com Layout e Proteção */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
               <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
@@ -72,9 +79,10 @@ function App() {
               <Route path="cupons" element={<AdminCupons />} />
             </Route>
           </Routes>
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+          // Arquivo: frontend/src/App.jsx - PARTE 3 DE 3
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
