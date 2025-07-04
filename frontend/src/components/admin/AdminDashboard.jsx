@@ -1,6 +1,7 @@
-// Arquivo: frontend/src/components/admin/AdminDashboard.jsx (Com nomes de variáveis corrigidos)
+// Arquivo: frontend/src/components/admin/AdminDashboard.jsx (Com Filtros)
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import './AdminDashboard.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
@@ -9,6 +10,7 @@ function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [timeRange, setTimeRange] = useState('hoje'); // << Estado para controlar o filtro
 
   const adminToken = sessionStorage.getItem('admin_password');
 
@@ -20,7 +22,8 @@ function AdminDashboard() {
     }
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/stats`, {
+      // Adiciona o parâmetro 'range' na URL da API
+      const response = await fetch(`${API_BASE_URL}/admin/stats?range=${timeRange}`, {
         headers: { 'Authorization': adminToken }
       });
       if (!response.ok) throw new Error('Falha ao buscar estatísticas.');
@@ -31,7 +34,7 @@ function AdminDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [adminToken]);
+  }, [adminToken, timeRange]); // << Roda a busca sempre que o timeRange mudar
 
   useEffect(() => {
     fetchStats();
@@ -40,54 +43,60 @@ function AdminDashboard() {
   if (isLoading) {
     return <div className="admin-section-container"><p>Carregando dashboard...</p></div>;
   }
-
   if (error) {
     return <div className="admin-section-container"><p className="error-message">{error}</p></div>;
   }
-
   if (!stats) {
     return <div className="admin-section-container"><p>Não foi possível carregar os dados.</p></div>;
   }
 
   return (
     <div className="admin-section-container">
-      <h2>Dashboard</h2>
-      <p>Uma visão geral e em tempo real do seu negócio.</p>
+      <div className="dashboard-header">
+        <div>
+          <h2>Dashboard</h2>
+          <p>Uma visão geral do seu negócio.</p>
+        </div>
+        {/* >> NOVOS BOTÕES DE FILTRO << */}
+        <div className="dashboard-filters">
+          <button onClick={() => setTimeRange('hoje')} className={timeRange === 'hoje' ? 'active' : ''}>Hoje</button>
+          <button onClick={() => setTimeRange('semana')} className={timeRange === 'semana' ? 'active' : ''}>Esta Semana</button>
+          <button onClick={() => setTimeRange('mes')} className={timeRange === 'mes' ? 'active' : ''}>Este Mês</button>
+          <button onClick={() => setTimeRange('ano')} className={timeRange === 'ano' ? 'active' : ''}>Este Ano</button>
+          <button onClick={() => setTimeRange('total')} className={timeRange === 'total' ? 'active' : ''}>Total</button>
+        </div>
+      </div>
       
       <div className="stats-grid">
         <div className="stat-card">
-          <h4>Receita Total (Entregue)</h4>
-          {/* CORREÇÃO AQUI: de receitatotal para receitaTotal */}
+          <h4>Receita (Entregue)</h4>
           <p>R$ {Number(stats.receitaTotal).toFixed(2).replace('.', ',')}</p>
         </div>
         <div className="stat-card">
-          <h4>Total de Pedidos</h4>
-          {/* CORREÇÃO AQUI: de totalpedidos para totalPedidos */}
+          <h4>Pedidos no Período</h4>
           <p>{stats.totalPedidos}</p>
         </div>
         <div className="stat-card">
           <h4>Pedidos Pendentes</h4>
-          {/* CORREÇÃO AQUI: de pedidospendentes para pedidosPendentes */}
           <p>{stats.pedidosPendentes}</p>
         </div>
       </div>
 
       <div className="recent-orders">
-        <h3>Últimos Pedidos</h3>
+        <h3>Últimos 5 Pedidos (Geral)</h3>
         <div className="order-list-header">
           <span>ID</span>
           <span>Cliente</span>
           <span>Total</span>
           <span>Status</span>
         </div>
-        
-        {stats.ultimosPedidos && stats.ultimosPedidos.map(pedido => (
-          <div key={pedido.id} className="recent-order-item">
+        {stats.ultimosPedidos.map(pedido => (
+          <Link to={`/admin/pedidos`} key={pedido.id} className="recent-order-item">
             <span>#{pedido.id}</span>
             <span>{pedido.nome_cliente}</span>
             <span>R$ {Number(pedido.valor_total).toFixed(2).replace('.', ',')}</span>
             <span><span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span></span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
