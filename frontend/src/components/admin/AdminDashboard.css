@@ -14,28 +14,39 @@
 }
 .dashboard-header p {
     margin: 0;
+    color: var(--text-color-light);
 }
+
+/* >> ESTILOS PARA OS NOVOS FILTROS << */
 .dashboard-filters {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    align-items: center;
     background-color: var(--bg-color);
     padding: 0.5rem;
     border-radius: var(--border-radius);
 }
-.dashboard-filters button {
-    background: transparent;
+.dashboard-filters input[type="date"] {
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-family: var(--font-body);
+}
+.dashboard-filters .filter-button {
+    background: var(--primary-color);
+    color: white;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-color-light);
 }
-.dashboard-filters button.active {
-    background-color: var(--card-bg);
-    color: var(--primary-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+.dashboard-filters .clear-button-dash {
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    cursor: pointer;
+    font-weight: 600;
 }
 
 .stats-grid {
