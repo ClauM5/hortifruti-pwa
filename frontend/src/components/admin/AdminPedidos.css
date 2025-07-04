@@ -1,82 +1,98 @@
 /* Arquivo: frontend/src/components/admin/AdminPedidos.css */
 
-.order-list-admin {
+.admin-pedidos-container {
+    padding: 2rem;
+    background-color: #f9f9f9;
+}
+
+.admin-pedidos-container h2 {
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.pedidos-list {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+}
+
+.pedido-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.pedido-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pedido-card-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.pedido-info {
+    display: flex;
+    align-items: center;
     gap: 1.5rem;
 }
 
-.order-card-admin {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-}
-
-.order-card-header {
+.pedido-info-right {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background-color: var(--bg-color);
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    gap: 1.5rem;
 }
 
-.order-card-header h4 {
-    margin: 0;
-    font-family: var(--font-headings);
-    font-size: 1.2rem;
-}
-
-.order-card-header span {
-    font-size: 0.9rem;
-    color: var(--text-color-light);
-}
-
-.order-card-body {
-    padding: 1.5rem;
-}
-
-.order-card-body p {
-    margin: 0 0 0.75rem 0;
-}
-
-.item-list-admin {
-    list-style-type: '- ';
-    padding-left: 1rem;
-}
-
-.order-card-footer-admin {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    background-color: var(--bg-color);
-    border-top: 1px solid var(--border-color);
-}
-
-.order-total-admin {
-    font-family: var(--font-headings);
+.pedido-card-header strong {
     font-size: 1.1rem;
-    font-weight: 600;
 }
 
-.order-status-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.pedido-card-body {
+    padding: 1.5rem;
+    background-color: #fafafa;
 }
 
-.order-status-control label {
-    font-weight: 600;
+.pedido-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 }
 
-.order-status-control select {
-    padding: 0.5rem;
-    border-radius: var(--border-radius);
-    border: 1px solid #ccc;
+.pedido-details-grid h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #555;
+}
+
+.pedido-details-grid ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pedido-details-grid li {
+    padding: 0.25rem 0;
+}
+
+/* Estilos de Status (Reutilizados de outros arquivos) */
+.status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
     font-weight: bold;
-    background-color: #fff;
+    font-size: 0.9rem;
+    color: #fff;
+    text-align: center;
 }
+
+.status-recebido { background-color: #3498db; }
+.status-em-preparo { background-color: #f1c40f; color: #333; }
+.status-pronto-para-retirada { background-color: #e67e22; }
+.status-saiu-para-entrega { background-color: #9b59b6; }
+.status-entregue { background-color: #2ecc71; }
+.status-cancelado { background-color: #e74c3c; }

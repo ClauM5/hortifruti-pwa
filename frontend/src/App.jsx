@@ -30,6 +30,7 @@ import './App.css';
 // Componentes REAIS que já construímos
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
+import AdminPedidos from './components/admin/AdminPedidos';
 
 // Componentes placeholder para as seções que AINDA VAMOS CONSTRUIR
 const AdminDashboard = () => <div><h2>Dashboard</h2><p>Visão geral do seu negócio.</p></div>;
