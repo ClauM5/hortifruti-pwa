@@ -1,4 +1,5 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Versão Limpa)
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com Polling)
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -7,7 +8,6 @@ import { subscribeUserToPush } from '../utils/push-notifications';
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
-const WS_URL = 'wss://hortifruti-backend.onrender.com';
 
 function AccountPage() {
   const { user, token, logout } = useAuth();
@@ -17,12 +17,36 @@ function AccountPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => { if (!token) { setIsLoading(false); return; } const fetchPedidos = async () => { setIsLoading(true); setError(''); try { const response = await fetch(`${API_BASE_URL}/meus-pedidos`, { headers: { 'Authorization': `Bearer ${token}` } }); if (!response.ok) throw new Error('Falha ao buscar seus pedidos.'); const data = await response.json(); setPedidos(data); } catch (err) { setError(err.message); } finally { setIsLoading(false); } }; fetchPedidos(); }, [token]);
-  useEffect(() => { if (!token || !user) return; const ws = new WebSocket(`${WS_URL}?token=${token}`); ws.onopen = () => console.log('Conexão WebSocket aberta na página da conta.'); ws.onmessage = (event) => { const message = JSON.parse(event.data); if (message.type === 'STATUS_UPDATE') { setPedidos(prevPedidos => prevPedidos.map(p => p.id === message.payload.pedidoId ? { ...p, status: message.payload.novoStatus } : p )); } }; ws.onerror = (err) => console.error("Erro no WebSocket da conta:", err); ws.onclose = () => console.log('Conexão WebSocket da conta fechada.'); return () => { ws.close(); }; }, [token, user]);
+  const fetchPedidos = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/meus-pedidos`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!response.ok) throw new Error('Falha ao buscar seus pedidos.');
+      const data = await response.json();
+      setPedidos(data);
+    } catch (err) { setError(err.message); } finally { if(isLoading) setIsLoading(false); }
+  };
+
+  // Efeito para a busca inicial
+  useEffect(() => {
+    fetchPedidos();
+  }, [token]);
+
+  // Efeito para o polling da lista de pedidos
+  useEffect(() => {
+    if (!token) return;
+    // A cada 15 segundos, busca a lista de pedidos novamente
+    const intervalId = setInterval(() => {
+        fetchPedidos();
+    }, 15000); // 15 segundos
+    
+    return () => clearInterval(intervalId);
+  }, [token]);
+
 
   const handleLogout = () => { logout(); navigate('/'); };
   const handleReorder = (itensDoPedido) => { fetch(`${API_BASE_URL}/produtos`).then(res => res.json()).then(allProducts => { itensDoPedido.forEach(item => { const produtoCompleto = allProducts.find(p => p.id === item.produto_id); if (produtoCompleto) { for (let i = 0; i < item.quantidade; i++) { addToCart(produtoCompleto); } } }); navigate('/checkout'); }); };
-  const handleEnableNotifications = async () => { if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) { alert('Seu navegador não suporta notificações push.'); return; } if (Notification.permission === 'granted') { alert('As notificações já estão ativadas.'); await subscribeUserToPush(token); } else if (Notification.permission !== 'denied') { const permission = await Notification.requestPermission(); if (permission === 'granted') { await subscribeUserToPush(token); } } else { alert('As notificações estão bloqueadas. Por favor, altere as permissões do site nas configurações do seu navegador.'); } };
+  const handleEnableNotifications = async () => { if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) { alert('Seu navegador não suporta notificações push.'); return; } if (Notification.permission === 'granted') { alert('As notificações já estão ativadas.'); await subscribeUserToPush(token); } else if (Notification.permission !== 'denied') { const permission = await Notification.requestPermission(); if (permission === 'granted') { await subscribeUserToPush(token); } } else { alert('As notificações estão bloqueadas nas configurações do seu navegador.'); } };
 
   if (isLoading) return <p>Carregando seus dados...</p>;
   if (!user) { return ( <div className="auth-container"> <p>Você precisa estar logado.</p> <button onClick={() => navigate('/login')}>Fazer Login</button> </div> ); }

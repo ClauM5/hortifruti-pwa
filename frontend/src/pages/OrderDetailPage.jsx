@@ -1,11 +1,11 @@
-// Arquivo: frontend/src/pages/OrderDetailPage.jsx (Com WS_URL corrigido)
+// Arquivo: frontend/src/pages/OrderDetailPage.jsx (Com Polling)
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './OrderDetailPage.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
-const WS_URL = 'wss://hortifruti-backend.onrender.com'; // << GARANTINDO QUE ESTÁ AQUI
 
 const StatusTimeline = ({ status }) => {
     const statuses = ['Recebido', 'Em Preparo', 'Pronto para retirada', 'Saiu para Entrega', 'Entregue'];
@@ -24,29 +24,41 @@ function OrderDetailPage() {
 
     const fetchPedidoDetails = useCallback(async () => {
         if (!token) return;
+        // Não mostra "Carregando..." para as atualizações de polling, apenas para a carga inicial
+        // setIsLoading(true); 
         try {
             const response = await fetch(`${API_BASE_URL}/pedidos/${pedidoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) throw new Error('Não foi possível carregar os detalhes do pedido.');
             const data = await response.json();
             setPedido(data);
-        } catch (err) { setError(err.message); } finally { setLoading(false); }
-    }, [pedidoId, token]);
+        } catch (err) { setError(err.message); } finally { if(loading) setLoading(false); }
+    }, [pedidoId, token, loading]);
 
-    useEffect(() => { fetchPedidoDetails(); }, [fetchPedidoDetails]);
-
+    // Efeito para a busca inicial de dados
     useEffect(() => {
-        if (!token) return;
-        const ws = new WebSocket(`${WS_URL}?token=${token}`);
-        ws.onopen = () => console.log('Conectado ao WebSocket para rastreamento.');
-        ws.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            if (message.type === 'STATUS_UPDATE' && message.payload.pedidoId === parseInt(pedidoId)) {
-                setPedido(prevPedido => ({ ...prevPedido, status: message.payload.novoStatus }));
-            }
-        };
-        ws.onclose = () => console.log('Desconectado do WebSocket de rastreamento.');
-        return () => ws.close();
-    }, [token, pedidoId]);
+        fetchPedidoDetails();
+    }, [fetchPedidoDetails]);
+
+    // =======================================================
+    // >> LÓGICA DE POLLING (O "INTERFONE") <<
+    // =======================================================
+    useEffect(() => {
+        // Se o pedido não existe, ou se já chegou a um status final, não faz nada.
+        if (!pedido || pedido.status === 'Entregue' || pedido.status === 'Cancelado') {
+            return;
+        }
+
+        // A cada 8 segundos, busca os detalhes do pedido novamente.
+        const intervalId = setInterval(() => {
+            console.log(`Polling para o pedido #${pedido.id}...`);
+            fetchPedidoDetails();
+        }, 8000); // 8000 milissegundos = 8 segundos
+
+        // Função de limpeza: para o "interfone" quando o usuário sai da página.
+        return () => clearInterval(intervalId);
+
+    }, [pedido, fetchPedidoDetails]); // Roda este efeito sempre que o objeto do pedido mudar.
+
 
     if (loading) return <p>Carregando detalhes do pedido...</p>;
     if (error) return <p className="error-message">{error}</p>;
