@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/components/admin/AdminDashboard.jsx (Corrigido)
+// Arquivo: frontend/src/components/admin/AdminDashboard.jsx (Com nomes de variáveis corrigidos)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import './AdminDashboard.css';
@@ -57,15 +57,18 @@ function AdminDashboard() {
       <div className="stats-grid">
         <div className="stat-card">
           <h4>Receita Total (Entregue)</h4>
-          <p>R$ {Number(stats.receitatotal).toFixed(2).replace('.', ',')}</p>
+          {/* CORREÇÃO AQUI: de receitatotal para receitaTotal */}
+          <p>R$ {Number(stats.receitaTotal).toFixed(2).replace('.', ',')}</p>
         </div>
         <div className="stat-card">
           <h4>Total de Pedidos</h4>
-          <p>{stats.totalpedidos}</p>
+          {/* CORREÇÃO AQUI: de totalpedidos para totalPedidos */}
+          <p>{stats.totalPedidos}</p>
         </div>
         <div className="stat-card">
           <h4>Pedidos Pendentes</h4>
-          <p>{stats.pedidospendentes}</p>
+          {/* CORREÇÃO AQUI: de pedidospendentes para pedidosPendentes */}
+          <p>{stats.pedidosPendentes}</p>
         </div>
       </div>
 
@@ -78,7 +81,6 @@ function AdminDashboard() {
           <span>Status</span>
         </div>
         
-        {/* CORREÇÃO APLICADA AQUI: de 'ultimospedidos' para 'ultimosPedidos' */}
         {stats.ultimosPedidos && stats.ultimosPedidos.map(pedido => (
           <div key={pedido.id} className="recent-order-item">
             <span>#{pedido.id}</span>
@@ -87,7 +89,6 @@ function AdminDashboard() {
             <span><span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span></span>
           </div>
         ))}
-
       </div>
     </div>
   );
