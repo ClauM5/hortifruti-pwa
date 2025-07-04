@@ -12,7 +12,7 @@ function AdminPedidos() {
   const [error, setError] = useState('');
   const [pedidoExpandido, setPedidoExpandido] = useState(null);
 
-  // CORREÇÃO: Pega a senha do sessionStorage
+  // CORREÇÃO: Pegare a senha do sessionStorage
   const adminToken = sessionStorage.getItem('admin_password');
 
   const fetchInitialData = useCallback(async () => {
