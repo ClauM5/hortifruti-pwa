@@ -85,7 +85,7 @@ function AccountPage() {
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
-          {/* O botão de notificação pode ser adicionado de volta aqui quando quisermos */}
+          {/* O botão dedd notificação pode ser adicionado de volta aqui quando quisermos */}
         </div>
         <div className="order-history">
           <h3>Seus Pedidos</h3>
