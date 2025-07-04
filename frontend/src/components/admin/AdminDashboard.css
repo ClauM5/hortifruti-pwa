@@ -1,0 +1,65 @@
+/* Arquivo: frontend/src/components/admin/AdminDashboard.css */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.stat-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color-light);
+    font-size: 1rem;
+}
+
+.stat-card p {
+    margin: 0;
+    font-family: var(--font-headings);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.recent-orders {
+    margin-top: 2rem;
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.recent-orders h3 {
+    margin-top: 0;
+}
+
+.order-list-header {
+    display: grid;
+    grid-template-columns: 1fr 3fr 2fr 2fr;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--text-color-light);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.recent-order-item {
+    display: grid;
+    grid-template-columns: 1fr 3fr 2fr 2fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.recent-order-item:last-child {
+    border-bottom: none;
+}

@@ -1,13 +1,9 @@
-// Arquivo: frontend/src/App.jsx (Com import que faltava)
+// Arquivo: frontend/src/App.jsx
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './pages/AdminLayout';
-
-// Páginas
 import HomePage from './pages/HomePage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
@@ -17,24 +13,21 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import CartPage from './pages/CartPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-import AddressPage from './pages/AddressPage'; // <<--- A LINHA QUE FALTAVA
-
-// Provedores de Contexto
+import AddressPage from './pages/AddressPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
-
-// Estilos
 import './App.css';
 
-// Componentes do Admin
-import AdminDashboard from './components/admin/AdminDashboard';
+// Componentes Reais do Admin
+import AdminDashboard from './components/admin/AdminDashboard'; // << USA O COMPONENTE REAL
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
 import AdminPedidos from './components/admin/AdminPedidos';
-import AdminBanners from './components/admin/AdminBanners';
-import AdminCupons from './components/admin/AdminCupons';
 
-// Componente "Guardião" para proteger as rotas do admin
+// Placeholders
+const AdminBanners = () => <div className="admin-section-container"><h2>Gerenciar Banners</h2><p>Em breve...</p></div>;
+const AdminCupons = () => <div className="admin-section-container"><h2>Gerenciar Cupons</h2><p>Em breve...</p></div>;
+
 const ProtectedAdminRoute = ({ children }) => {
   const isAdminLoggedIn = sessionStorage.getItem('admin_password');
   return isAdminLoggedIn === '102030' ? children : <Navigate to="/admin/login" replace />;
@@ -59,7 +52,7 @@ function App() {
             </Route>
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
-              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route index element={<Navigate to="dashboard" replace />} /> 
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="pedidos" element={<AdminPedidos />} />
               <Route path="produtos" element={<AdminProdutos />} />
