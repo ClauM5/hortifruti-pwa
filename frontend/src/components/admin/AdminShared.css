@@ -1,0 +1,63 @@
+/* Arquivo: frontend/src/components/admin/AdminShared.css */
+
+.admin-section-container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .admin-section-container {
+        padding: 2rem;
+    }
+}
+
+.admin-section-container h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.admin-section-container p {
+    color: var(--text-color-light);
+    margin-bottom: 2rem;
+}
+
+.admin-form {
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    background-color: #f9f9f9;
+}
+
+.admin-form h4 {
+    margin-top: 0;
+    font-weight: 600;
+}
+
+.form-grid-col-2 {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 600px) {
+    .form-grid-col-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.checkbox-label-align {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px !important; /* Força o alinhamento */
+}
+
+.admin-list {
+    margin-top: 2rem;
+}
+
+.admin-list h3 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
