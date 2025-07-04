@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/App.jsx (Versão Final, Completa e Verificada)
+// Arquivo: frontend/src/App.jsx (Versão Final, Verificada e Corrigida)
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -26,7 +26,7 @@ import { AuthProvider } from './context/AuthContext';
 // Estilos
 import './App.css';
 
-// Componentes Reais do Admin que já construímos
+// Componentes Reais do Admin
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminCategorias from './components/admin/AdminCategorias';
 import AdminProdutos from './components/admin/AdminProdutos';
