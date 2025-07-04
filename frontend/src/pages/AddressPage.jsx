@@ -7,7 +7,7 @@ import './AddressPage.css';
 const API_ENDERECOS_URL = 'https://hortifruti-backend.onrender.com/api/enderecos';
 
 function AddressPage() {
-    const { token } = useAuth();
+    const { token, fetchWithAuth } = useAuth();
     const [enderecos, setEnderecos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -26,9 +26,7 @@ function AddressPage() {
         if (!token) return;
         setIsLoading(true);
         try {
-            const response = await fetch(API_ENDERECOS_URL, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await fetchWithAuth(API_ENDERECOS_URL);
             if (!response.ok) throw new Error('Falha ao buscar endereços.');
             const data = await response.json();
             setEnderecos(data);
@@ -37,7 +35,7 @@ function AddressPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [token]);
+    }, [token, fetchWithAuth]);
 
     useEffect(() => {
         fetchEnderecos();
@@ -52,17 +50,11 @@ function AddressPage() {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch(API_ENDERECOS_URL, {
+            const response = await fetchWithAuth(API_ENDERECOS_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(formEndereco)
             });
             if (!response.ok) throw new Error('Não foi possível salvar o endereço.');
-            
-            // Limpa o formulário e recarrega a lista
             setFormEndereco({ nome_identificador: '', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '' });
             fetchEnderecos();
         } catch (err) {
@@ -73,11 +65,10 @@ function AddressPage() {
     const handleDeleteAddress = async (addressId) => {
         if (!window.confirm('Tem certeza que deseja deletar este endereço?')) return;
         try {
-            await fetch(`${API_ENDERECOS_URL}/${addressId}`, {
+            await fetchWithAuth(`${API_ENDERECOS_URL}/${addressId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
             });
-            fetchEnderecos(); // Recarrega a lista
+            fetchEnderecos();
         } catch (err) {
             setError('Falha ao deletar o endereço.');
         }
@@ -86,7 +77,6 @@ function AddressPage() {
     return (
         <div className="address-manager-container">
             <h2>Meus Endereços</h2>
-
             <form onSubmit={handleSaveAddress} className="address-form">
                 <h3>Adicionar Novo Endereço</h3>
                 <input name="nome_identificador" value={formEndereco.nome_identificador} onChange={handleInputChange} placeholder="Identificador (ex: Casa, Trabalho)" required />
@@ -99,7 +89,6 @@ function AddressPage() {
                 <input name="estado" value={formEndereco.estado} onChange={handleInputChange} placeholder="Estado" required />
                 <button type="submit" className="primary-button">Salvar Endereço</button>
             </form>
-            
             <div className="address-list">
                 <h3>Endereços Salvos</h3>
                 {isLoading && <p>Carregando...</p>}
@@ -111,12 +100,10 @@ function AddressPage() {
                             <p>{addr.logradouro}, {addr.numero} {addr.complemento && `- ${addr.complemento}`}</p>
                             <p>{addr.bairro}, {addr.cidade} - {addr.estado}</p>
                             <p>CEP: {addr.cep}</p>
-                            <button onClick={() => handleDeleteAddress(addr.id)} className="delete-address-btn">Deletar</button>
+                            <button onClick={() => handleDeleteAddress(addr.id)} className="delete-address-btn"></button>
                         </div>
                     ))
-                ) : (
-                    !isLoading && <p>Nenhum endereço salvo.</p>
-                )}
+                ) : ( !isLoading && <p>Nenhum endereço salvo.</p> )}
             </div>
         </div>
     );
