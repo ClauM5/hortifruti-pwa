@@ -1,41 +1,38 @@
-/* Arquivo: frontend/src/App.css (Com o novo Design System "Impacto Vibrante") */
+/* Arquivo: frontend/src/App.css (Com o design "Vibrante e Sofisticado") */
 :root {
-  /* Nova Paleta de Cores */
-  --primary-color: #39FF14;        /* Verde Limão Elétrico */
-  --accent-color: #9400D3;         /* Roxo Açaí Intenso */
+  /* Paleta de Cores: Floresta Noturna */
+  --primary-color: #50C878;        /* Verde Esmeralda/Menta para ações */
+  --accent-color: #F08080;         /* Coral Suave para destaques (ex: favoritos) */
   
-  --text-color-light: #F5F5F5;     /* Branco suave para textos */
-  --text-color-dark: #A0A0A0;      /* Cinza claro para textos secundários */
-  --bg-color: #121212;             /* Fundo Grafite Principal (quase preto) */
-  --card-bg: #1E1E1E;              /* Fundo dos cards, um pouco mais claro */
-  --border-color: #2c2c2c;         /* Cor das bordas, sutil */
+  --text-color-light: #EAEAEA;     /* Branco suave para textos principais */
+  --text-color-dark: #9E9E9E;      /* Cinza claro para textos secundários */
+  --bg-color: #1A1A1A;             /* Fundo Grafite Principal (quase preto) */
+  --card-bg: #2C2C2C;              /* Fundo dos cards, um pouco mais claro */
+  --border-color: #3C3C3C;         /* Cor das bordas, sutil */
 
-  --status-success: #28a745;
-  --status-error: #f44336;
+  --status-success: #2E7D32;       /* Verde mais escuro para sucesso */
+  --status-error: #D32F2F;
 
-  /* Nova Tipografia */
+  /* Tipografia */
   --font-body: 'Inter', sans-serif;
-  --font-headings: 'Anton', sans-serif; /* Fonte de impacto para títulos */
+  --font-headings: 'Poppins', sans-serif;
 
   /* UI */
-  --border-radius: 12px; /* Bordas arredondadas, como você pediu! */
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --border-radius: 12px;
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 body {
   margin: 0;
   font-family: var(--font-body);
   background-color: var(--bg-color);
-  color: var(--text-color-light); /* Cor de texto padrão para o fundo escuro */
+  color: var(--text-color-light);
 }
 
-/* Estilo base para todos os títulos */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-headings);
   color: var(--text-color-light);
-  text-transform: uppercase; /* Deixa os títulos em maiúsculas para mais impacto */
-  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .error-message {
@@ -45,14 +42,20 @@ h1, h2, h3, h4, h5, h6 {
   margin: 1rem 0;
 }
 
-/* Estilos Iniciais para os Cards de Produto */
+/* Estilos de Base para os Cards de Produto */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
 .product-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  box-shadow: none; /* Remove a sombra padrão por enquanto */
+  box-shadow: none;
   overflow: hidden;
-  transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -60,6 +63,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-card:hover {
   transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
   border-color: var(--primary-color);
 }
 
@@ -71,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-content {
-  padding: 1rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -79,38 +83,35 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-name {
   font-size: 1.2rem;
-  font-weight: 400; /* Anton já é grosso, não precisa de mais peso */
   margin: 0 0 10px 0;
   flex-grow: 1;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .product-price {
   font-family: var(--font-body);
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--text-color-light);
   margin: 0 0 15px 0;
-  text-transform: none; /* Preço não fica em maiúsculas */
 }
 
 .add-to-cart-button {
-  background: linear-gradient(90deg, var(--primary-color) 0%, #2dc41e 100%);
-  color: #000;
+  background: var(--primary-color);
+  color: #000; /* Texto preto para bom contraste com o verde claro */
   border: none;
   border-radius: var(--border-radius);
   padding: 14px;
   cursor: pointer;
   font-family: var(--font-headings);
-  font-size: 1.1rem;
-  font-weight: 400;
-  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 600;
   width: 100%;
   transition: transform 0.2s ease;
 }
 
 .add-to-cart-button:hover:not(:disabled) {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .add-to-cart-button:disabled {
