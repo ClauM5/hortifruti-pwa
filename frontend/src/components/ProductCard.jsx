@@ -1,6 +1,6 @@
-// Arquivo: frontend/src/components/ProductCard.jsx (Com todas as correções)
+// Arquivo: frontend/src/components/ProductCard.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import './ProductCard.css';
@@ -9,22 +9,29 @@ const HeartIconFilled = () => ( <svg xmlns="http://www.w3.org/2000/svg" viewBox=
 const HeartIconOutlined = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="24" height="24"> <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /> </svg> );
 
 function ProductCard({ product }) {
-  const { addToCart, cartItems } = useCart();
-  const { user, favoritos, toggleFavorito } = useAuth();
+  const { addToCart } = useCart();
+  const { user, toggleFavorito } = useAuth();
   
+  // Estado local apenas para o feedback visual temporário
   const [isJustAdded, setIsJustAdded] = useState(false);
 
-  // O estado de favorito e de estar no carrinho agora são derivados corretamente
-  const isFavorited = user && favoritos.has(product.id);
-  const isInCart = cartItems.some(item => item.id === product.id);
+  // O estado de favorito agora vem diretamente da prop do produto, que é atualizada pela HomePage
+  const isFavorited = product.is_favorito;
 
   const handleAddToCart = () => {
-    if (isInCart) return; // Não faz nada se já estiver no carrinho
     addToCart(product);
     setIsJustAdded(true);
     setTimeout(() => {
       setIsJustAdded(false);
-    }, 2000); // Reseta o feedback visual após 2 segundos
+    }, 1500); // Reseta o feedback visual após 1.5 segundos
+  };
+
+  const handleFavoriteClick = () => {
+    if (!user) {
+        alert('Você precisa estar logado para adicionar aos favoritos.');
+        return;
+    }
+    toggleFavorito(product.id);
   };
 
   return (
@@ -33,7 +40,7 @@ function ProductCard({ product }) {
         <img src={product.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={product.nome} className="product-image" />
         {user && (
           <button 
-            onClick={() => toggleFavorito(product.id)} 
+            onClick={handleFavoriteClick} 
             className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
             aria-label="Adicionar aos favoritos"
           >
@@ -49,10 +56,10 @@ function ProductCard({ product }) {
         </p>
         <button 
           onClick={handleAddToCart} 
-          className={`add-to-cart-button ${isInCart ? 'in-cart' : ''} ${isJustAdded ? 'just-added' : ''}`}
-          disabled={isInCart}
+          className={`add-to-cart-button ${isJustAdded ? 'just-added' : ''}`}
+          disabled={isJustAdded} // Desabilita apenas durante o feedback visual
         >
-          {isJustAdded ? 'Adicionado ✓' : (isInCart ? 'No Carrinho' : 'Adicionar')}
+          {isJustAdded ? 'Adicionado ✓' : 'Adicionar ao Carrinho'}
         </button>
       </div>
     </div>
