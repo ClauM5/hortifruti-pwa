@@ -6,12 +6,12 @@
     min-height: 100vh;
 }
 
-/* Este é o nosso novo container que vai centralizar o conteúdo */
 .page-content {
     flex-grow: 1;
-    max-width: 1200px;  /* Define uma largura máxima para o conteúdo */
+    max-width: 1200px;
     width: 100%;
-    margin: 0 auto;     /* Centraliza o container na página */
-    padding: 2rem;      /* Adiciona um respiro/espaçamento nas laterais e no topo/fundo */
-    box-sizing: border-box; /* Garante que o padding não afete a largura total */
+    margin: 0 auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    padding-top: 100px; /* << ESPAÇAMENTO ADICIONADO para compensar o navbar fixo */
 }

@@ -1,8 +1,77 @@
-/* Arquivo: frontend/src/components/Navbar.css */
-.navbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background-color: var(--card-bg); box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box; }
-.navbar-logo { font-family: var(--font-headings); font-size: 1.3rem; font-weight: 700; color: var(--primary-color); text-decoration: none; flex-shrink: 0; }
-.navbar-links { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-.navbar-links a { text-decoration: none; color: var(--text-color-light); font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
-.navbar-links a:hover { color: var(--primary-color); }
-.cart-link { background-color: #f0f0f0; padding: 0.5rem 1rem; border-radius: 20px; }
-@media (min-width: 768px) { .navbar { padding: 1rem 2rem; flex-wrap: nowrap; } .navbar-logo { font-size: 1.5rem; } .navbar-links { gap: 1.5rem; } .navbar-links a { font-size: 1rem; } }
+/* Arquivo: frontend/src/components/Navbar.css (Refinado) */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    box-sizing: border-box;
+    position: fixed; /* Fixa o menu no topo */
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar-logo {
+    font-family: var(--font-headings);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.navbar-links a {
+    text-decoration: none;
+    color: var(--text-color-dark);
+    font-weight: 600; /* Um pouco mais de peso */
+    font-size: 0.9rem;
+    white-space: nowrap;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease-in-out;
+}
+
+.navbar-links a:hover {
+    color: var(--primary-color);
+    background-color: var(--bg-color);
+}
+
+.cart-link {
+    background-color: var(--bg-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+}
+.cart-link:hover {
+    background-color: #e0e0e0;
+}
+
+
+/* Regras para telas maiores */
+@media (min-width: 768px) {
+    .navbar {
+        padding: 1rem 2rem;
+        flex-wrap: nowrap;
+    }
+    .navbar-logo {
+        font-size: 1.5rem;
+    }
+    .navbar-links {
+        gap: 1.5rem;
+    }
+    .navbar-links a {
+        font-size: 1rem;
+    }
+}
