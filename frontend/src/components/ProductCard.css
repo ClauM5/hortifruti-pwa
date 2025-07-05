@@ -13,6 +13,11 @@
 .add-to-cart-button { background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); padding: 14px; cursor: pointer; font-family: var(--font-headings); font-size: 1rem; font-weight: 600; width: 100%; transition: all 0.2s ease; }
 .add-to-cart-button:hover:not(:disabled) { background-color: var(--primary-color-light); transform: scale(1.02); }
 .add-to-cart-button:disabled { cursor: not-allowed; }
+/* ESTILOS CORRIGIDOS PARA O BOTÃO DE FAVORITO */
+.favorite-button { position: absolute; top: 12px; right: 12px; background: transparent; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; z-index: 5; padding: 0; }
+.favorite-button:hover { transform: scale(1.15); }
+.favorite-button svg { stroke: var(--favorite-color); /* Usa a nova cor vermelha para o contorno */ fill: none; }
+.favorite-button.favorited svg { stroke: var(--favorite-color); fill: var(--favorite-color); }
 
 /* >> NOVOS ESTILOS DE ESTADO << */
 .add-to-cart-button.just-added {

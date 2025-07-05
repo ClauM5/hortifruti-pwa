@@ -5,7 +5,7 @@
   --primary-color-light: #4CAF50;
   --accent-color: #FFC107;
   --accent-color-hover: #FFD54F;
-  
+  --favorite-color: #E53935; /* << NOVA COR VERMELHA PARA FAVORITOS */
   --text-color-dark: #212121;
   --text-color-light: #757575;
   --bg-color: #c9c9c7; /* << CORRIGIDO para um tom mais suave */
