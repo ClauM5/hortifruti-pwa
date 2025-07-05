@@ -1,96 +1,85 @@
-// Arquivo: frontend/src/pages/HomePage.jsx (Com Carrossel de Banners)
+// Arquivo: frontend/src/pages/HomePage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import '../App.css';
+import React, { useState, useEffect } from 'react';
+import ProductCard from '../components/ProductCard'; // << Importa o novo componente
 import './HomePage.css';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import BannerCarousel from '../components/BannerCarousel'; // << 1. Importa o novo componente
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 
 function HomePage() {
-  const [produtos, setProdutos] = useState([]);
+  const [products, setProducts] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [addedProductId, setAddedProductId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { addToCart } = useCart();
-  const { user, token, toggleFavorito } = useAuth();
-
-  const fetchProdutos = useCallback(async () => {
-    setLoading(true);
-    let url = `${API_BASE_URL}/produtos?`;
-    if (searchTerm) url += `search=${searchTerm}`;
-    if (selectedCategory) url += `${searchTerm ? '&' : ''}categoria=${selectedCategory}`;
-
-    try {
-      const response = await fetch(url, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
-      const data = await response.json();
-      setProdutos(data);
-    } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [productsRes, categoriasRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/produtos`),
+          fetch(`${API_BASE_URL}/categorias`)
+        ]);
+        const productsData = await productsRes.json();
+        const categoriasData = await categoriasRes.json();
+        setProducts(productsData);
+        setCategorias([{ id: 0, nome: 'Todos' }, ...categoriasData]);
+      } catch (error) {
+        console.error("Falha ao buscar dados:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [searchTerm, selectedCategory, token]);
+    fetchData();
+  }, []);
 
-  const fetchCategorias = async () => { try { const response = await fetch(`${API_BASE_URL}/categorias`); const data = await response.json(); setCategorias(data); } catch (error) { console.error("Erro ao buscar categorias:", error); } };
-  useEffect(() => { fetchCategorias(); }, []);
-  useEffect(() => { const debounceTimer = setTimeout(() => { fetchProdutos(); }, 500); return () => clearTimeout(debounceTimer); }, [fetchProdutos]);
-  
-  const handleClearFilters = () => { setSearchTerm(''); setSelectedCategory(''); };
-
-  const handleAddToCart = (produto) => {
-    addToCart(produto);
-    setAddedProductId(produto.id);
-    setTimeout(() => { setAddedProductId(null); }, 2000);
-  };
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === 'Todos' || product.categorias.includes(selectedCategory);
+    const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <>
-      {/* 2. Adiciona o componente do carrossel no topo */}
-      <BannerCarousel />
-      
-      <div className="store-container">
-        <aside className="filters-sidebar">
-          <h4>Categorias</h4>
-          <ul>
-            <li className={selectedCategory === '' ? 'active' : ''} onClick={() => setSelectedCategory('')}>Todas</li>
-            {categorias.map(cat => ( <li key={cat.id} className={selectedCategory === cat.nome ? 'active' : ''} onClick={() => setSelectedCategory(cat.nome)}>{cat.nome}</li> ))}
-          </ul>
-        </aside>
+    <div className="store-container">
+      <aside className="filters-sidebar">
+        <h4>Categorias</h4>
+        <ul>
+          {categorias.map(cat => (
+            <li
+              key={cat.id}
+              className={selectedCategory === cat.nome ? 'active' : ''}
+              onClick={() => setSelectedCategory(cat.nome)}
+            >
+              {cat.nome}
+            </li>
+          ))}
+        </ul>
+      </aside>
 
-        <main className="product-area">
-          <div className="search-bar">
-            <input type="text" placeholder="O que você procura hoje?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            {(searchTerm || selectedCategory) && ( <button onClick={handleClearFilters} className="clear-button">Limpar Filtros</button> )}
-          </div>
+      <main className="product-area">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Buscar por nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && <button onClick={() => setSearchTerm('')} className="clear-button">Limpar</button>}
+        </div>
 
+        {isLoading ? (
+          <p>Carregando produtos...</p>
+        ) : (
           <div className="product-grid">
-            {loading ? <p>Carregando produtos...</p> : produtos.length > 0 ? (
-              produtos.map(produto => (
-                <div key={produto.id} className="product-card">
-                  {user && (
-                    <button className={`favorite-button ${produto.is_favorito ? 'favorited' : ''}`} onClick={() => toggleFavorito(produto.id)}> ❤️ </button>
-                  )}
-                  <img src={produto.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={produto.nome} className="product-image" />
-                  <div className="card-content">
-                    <h2 className="product-name">{produto.nome}</h2>
-                    <p className="product-price"> R$ {Number(produto.preco).toFixed(2).replace('.', ',')} / {produto.unidade} </p>
-                    <button onClick={() => handleAddToCart(produto)} className={`add-to-cart-button ${addedProductId === produto.id ? 'added' : ''}`} disabled={addedProductId === produto.id}>
-                      {addedProductId === produto.id ? 'Adicionado ✅' : 'Adicionar ao Carrinho'}
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : <p>Nenhum produto encontrado com os filtros selecionados.</p>}
+            {filteredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
-        </main>
-      </div>
-    </>
+        )}
+      </main>
+    </div>
   );
 }
+
 export default HomePage;
