@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Versão Refatorada e Corrigida)
+// Arquivo: frontend/src/pages/AccountPage.jsx (Com Polling Reativado)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -12,14 +12,15 @@ function AccountPage() {
   const { user, token, logout, fetchWithAuth } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  
   const [pedidos, setPedidos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchPedidos = useCallback(async () => {
-    // Não mostra o "Carregando..." para as atualizações de polling, só para a inicial
-    if (!isLoading) setIsLoading(true);
+  const fetchPedidos = useCallback(async (isInitialLoad = false) => {
+    if (!token) return;
+
+    // Só mostra o "Carregando..." na primeira vez
+    if (isInitialLoad) setIsLoading(true);
     setError('');
     
     try {
@@ -28,53 +29,44 @@ function AccountPage() {
       const data = await response.json();
       setPedidos(data);
     } catch (err) {
-      // Se o erro for de sessão expirada, o fetchWithAuth já faz o logout
       if (err.message !== 'Sua sessão expirou. Por favor, faça o login novamente.') {
         setError(err.message);
       }
     } finally {
-      setIsLoading(false);
+      // Só para de carregar na primeira vez
+      if (isInitialLoad) setIsLoading(false);
     }
-  }, [token, fetchWithAuth]); // A dependência do isLoading foi removida para evitar loops
+  }, [token, fetchWithAuth]);
 
+  // Efeito que roda uma vez para buscar os dados iniciais E configurar o polling
   useEffect(() => {
-    if (token) {
-        fetchPedidos(); // Busca os pedidos na primeira vez que a página carrega
-    } else {
-        setIsLoading(false);
-    }
-  }, [token, fetchPedidos]);
+    fetchPedidos(true); // True indica que é a carga inicial
+
+    const intervalId = setInterval(() => {
+      fetchPedidos(false); // False indica que é uma atualização em segundo plano
+    }, 15000); // A cada 15 segundos
+
+    // Limpa o intervalo quando o usuário sai da página
+    return () => clearInterval(intervalId);
+  }, [token, fetchPedidos]); // Depende apenas do token e da função de busca
 
 
   const handleLogout = () => { logout(); };
-
   const handleReorder = (itensDoPedido) => {
-    fetch(`${API_BASE_URL}/produtos`)
-      .then(res => res.json())
-      .then(allProducts => {
-        itensDoPedido.forEach(item => {
-          const produtoCompleto = allProducts.find(p => p.id === item.produto_id);
-          if (produtoCompleto) {
-            for (let i = 0; i < item.quantidade; i++) { addToCart(produtoCompleto); }
-          }
-        });
-        navigate('/checkout');
+    fetch(`${API_BASE_URL}/produtos`).then(res => res.json()).then(allProducts => {
+      itensDoPedido.forEach(item => {
+        const produtoCompleto = allProducts.find(p => p.id === item.produto_id);
+        if (produtoCompleto) { for (let i = 0; i < item.quantidade; i++) { addToCart(produtoCompleto); } }
       });
+      navigate('/checkout');
+    });
   };
 
   if (isLoading) {
     return <div className="auth-container"><p>Carregando seus dados...</p></div>;
   }
-
   if (!user) {
-    return (
-      <div className="auth-container">
-        <div className="account-page">
-          <p>Você precisa estar logado para ver esta página.</p>
-          <button onClick={() => navigate('/login')} className="primary-button">Fazer Login</button>
-        </div>
-      </div>
-    );
+    return ( <div className="auth-container"> <div className="account-page"> <p>Você precisa estar logado para ver esta página.</p> <button onClick={() => navigate('/login')} className="primary-button">Fazer Login</button> </div> </div> );
   }
 
   return (
@@ -85,7 +77,6 @@ function AccountPage() {
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
-          {/* O botão dedd notificação pode ser adicionado de volta aqui quando quisermos */}
         </div>
         <div className="order-history">
           <h3>Seus Pedidos</h3>
@@ -110,5 +101,4 @@ function AccountPage() {
     </div>
   );
 }
-
 export default AccountPage;
