@@ -1,76 +1,124 @@
-/* Arquivo: frontend/src/App.css (Com Cards de Produto Refinados) */
+/* Arquivo: frontend/src/App.css (Com o novo Design System "Impacto Vibrante") */
 :root {
-  /* ... (As variáveis que já definimos continuam aqui) ... */
-  --primary-color: #388E3C; --primary-color-light: #4CAF50; --accent-color: #FF8F00; --accent-color-hover: #FFB300; --text-color-dark: #212121; --text-color-light: #616161; --bg-color: #f5f5f5; --card-bg: #ffffff; --border-color: #e0e0e0; --status-success: #28a745; --status-error: #d32f2f; --status-info: #0288d1; --status-warning: #f57c00; --font-body: 'Lato', sans-serif; --font-headings: 'Poppins', sans-serif; --border-radius: 8px; --shadow-sm: 0 2px 4px rgba(0,0,0,0.05); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-}
-body { margin: 0; font-family: var(--font-body); background-color: var(--bg-color); color: var(--text-color-dark); }
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-headings); color: var(--text-color-dark); }
-.error-message { color: var(--status-error); font-weight: bold; text-align: center; margin: 1rem 0; }
+  /* Nova Paleta de Cores */
+  --primary-color: #39FF14;        /* Verde Limão Elétrico */
+  --accent-color: #9400D3;         /* Roxo Açaí Intenso */
+  
+  --text-color-light: #F5F5F5;     /* Branco suave para textos */
+  --text-color-dark: #A0A0A0;      /* Cinza claro para textos secundários */
+  --bg-color: #121212;             /* Fundo Grafite Principal (quase preto) */
+  --card-bg: #1E1E1E;              /* Fundo dos cards, um pouco mais claro */
+  --border-color: #2c2c2c;         /* Cor das bordas, sutil */
 
-/* REFINAMENTO DO CARD DE PRODUTO */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+  --status-success: #28a745;
+  --status-error: #f44336;
+
+  /* Nova Tipografia */
+  --font-body: 'Inter', sans-serif;
+  --font-headings: 'Anton', sans-serif; /* Fonte de impacto para títulos */
+
+  /* UI */
+  --border-radius: 12px; /* Bordas arredondadas, como você pediu! */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
 }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg-color);
+  color: var(--text-color-light); /* Cor de texto padrão para o fundo escuro */
+}
+
+/* Estilo base para todos os títulos */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+  color: var(--text-color-light);
+  text-transform: uppercase; /* Deixa os títulos em maiúsculas para mais impacto */
+  letter-spacing: 1px;
+}
+
+.error-message {
+  color: var(--status-error);
+  font-weight: bold;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* Estilos Iniciais para os Cards de Produto */
 .product-card {
   background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
+  box-shadow: none; /* Remove a sombra padrão por enquanto */
   overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   position: relative;
 }
+
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-color: var(--primary-color);
 }
+
 .product-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
+  background-color: #333;
 }
+
 .card-content {
   padding: 1rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
+
 .product-name {
-  font-family: var(--font-headings);
-  font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 400; /* Anton já é grosso, não precisa de mais peso */
   margin: 0 0 10px 0;
   flex-grow: 1;
+  line-height: 1.2;
 }
+
 .product-price {
-  font-size: 1.2rem;
+  font-family: var(--font-body);
+  font-size: 1.3rem;
   font-weight: 700;
-  color: var(--text-color-dark);
+  color: var(--primary-color);
   margin: 0 0 15px 0;
+  text-transform: none; /* Preço não fica em maiúsculas */
 }
+
 .add-to-cart-button {
-  background-color: var(--accent-color);
-  color: white;
+  background: linear-gradient(90deg, var(--primary-color) 0%, #2dc41e 100%);
+  color: #000;
   border: none;
   border-radius: var(--border-radius);
   padding: 14px;
   cursor: pointer;
   font-family: var(--font-headings);
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
   width: 100%;
-  transition: background-color 0.3s ease;
+  transition: transform 0.2s ease;
 }
+
 .add-to-cart-button:hover:not(:disabled) {
-  background-color: var(--accent-color-hover);
+  transform: scale(1.05);
 }
+
 .add-to-cart-button:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.5;
 }
+
 .add-to-cart-button.added {
-  background-color: var(--status-success);
+  background: var(--accent-color);
+  color: white;
 }
