@@ -1,29 +1,32 @@
-// Arquivo: frontend/src/pages/HomePage.jsx
+// Arquivo: frontend/src/pages/HomePage.jsx (Ouvindo os favoritos)
 
-import React, { useState, useEffect } from 'react';
-import ProductCard from '../components/ProductCard'; // << Importa o novo componente
+import React, { useState, useEffect, useCallback } from 'react';
+import ProductCard from '../components/ProductCard';
 import './HomePage.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
 
 function HomePage() {
-  const [products, setProducts] = useState([]);
+  const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+
+  // A HomePage não precisa mais da lógica de autenticação aqui,
+  // isso será responsabilidade do ProductCard
 
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
         const [productsRes, categoriasRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/produtos`),
+          fetch(`${API_BASE_URL}/produtos`), // Busca pública inicial
           fetch(`${API_BASE_URL}/categorias`)
         ]);
         const productsData = await productsRes.json();
         const categoriasData = await categoriasRes.json();
-        setProducts(productsData);
+        setProdutos(productsData);
         setCategorias([{ id: 0, nome: 'Todos' }, ...categoriasData]);
       } catch (error) {
         console.error("Falha ao buscar dados:", error);
@@ -34,8 +37,9 @@ function HomePage() {
     fetchData();
   }, []);
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'Todos' || product.categorias.includes(selectedCategory);
+  const filteredProducts = produtos.filter(product => {
+    const productCategories = product.categorias || [];
+    const matchesCategory = selectedCategory === 'Todos' || productCategories.includes(selectedCategory);
     const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });

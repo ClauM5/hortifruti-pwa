@@ -1,11 +1,24 @@
-// Arquivo: frontend/src/context/CartContext.jsx (Com addMultipleItemsToCart)
+// Arquivo: frontend/src/context/CartContext.jsx (Com Memória Permanente)
 
-import React, { createContext, useState, useContext, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
+  // Inicializa o carrinho com os dados salvos no localStorage, ou um array vazio
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const localData = localStorage.getItem('hortifruti_cart');
+      return localData ? JSON.parse(localData) : [];
+    } catch (error) {
+      return [];
+    }
+  });
+
+  // Salva o carrinho no localStorage sempre que ele for alterado
+  useEffect(() => {
+    localStorage.setItem('hortifruti_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const addToCart = useCallback((product) => {
     setCartItems(prevItems => {
@@ -17,32 +30,6 @@ export function CartProvider({ children }) {
       } else {
         return [...prevItems, { ...product, quantity: 1 }];
       }
-    });
-  }, []);
-
-  // >>>>> NOVA FUNÇÃO <<<<<
-  const addMultipleItemsToCart = useCallback((productsToAdd) => {
-    setCartItems(prevItems => {
-      let newItems = [...prevItems];
-      productsToAdd.forEach(productToAdd => {
-        const itemExists = newItems.find(item => item.id === productToAdd.produto_id);
-        if (itemExists) {
-          // Se o item já existe, apenas aumenta a quantidade
-          newItems = newItems.map(item =>
-            item.id === productToAdd.produto_id
-              ? { ...item, quantity: item.quantity + productToAdd.quantidade }
-              : item
-          );
-        } else {
-          // Se não existe, precisamos dos detalhes completos do produto.
-          // Esta função assume que o objeto 'productToAdd' tem as infos necessárias.
-          // Para o nosso caso (vindo do histórico de pedidos), ele não tem o nome, etc.
-          // Vamos simplificar por agora, mas o ideal seria buscar os detalhes do produto.
-          // Por enquanto, esta função não é usada, mas a deixamos como base.
-          // A lógica de recompra será feita diretamente na página da conta.
-        }
-      });
-      return newItems;
     });
   }, []);
 
@@ -72,8 +59,7 @@ export function CartProvider({ children }) {
     removeFromCart,
     updateQuantity,
     clearCart,
-    addMultipleItemsToCart, // <-- Exporta a nova função
-  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart, addMultipleItemsToCart]);
+  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
