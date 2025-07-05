@@ -1,16 +1,16 @@
-/* Arquivo: frontend/src/App.css (Com o design "Frescor Moderno" - Light Theme) */
+/* Arquivo: frontend/src/App.css (Com fundo suave) */
 :root {
   /* Paleta de Cores: Frescor Moderno */
-  --primary-color: #2E7D32;        /* Verde escuro e confiável */
-  --primary-color-light: #4CAF50;  /* Verde mais claro para destaques e hovers */
-  --accent-color: #FFC107;         /* Amarelo/Âmbar para botões de compra */
-  --accent-color-hover: #FFD54F;   /* Amarelo mais claro para hover */
+  --primary-color: #2E7D32;
+  --primary-color-light: #4CAF50;
+  --accent-color: #FFC107;
+  --accent-color-hover: #FFD54F;
   
-  --text-color-dark: #212121;      /* Quase preto para textos principais */
-  --text-color-light: #757575;     /* Cinza para textos secundários */
-  --bg-color: #f7f9fc;             /* Fundo principal bem claro, levemente azulado */
-  --card-bg: #ffffff;              /* Fundo dos cards branco puro */
-  --border-color: #e0e0e0;         /* Cor das bordas, sutil */
+  --text-color-dark: #212121;
+  --text-color-light: #757575;
+  --bg-color: #f0f0f0; /* << CORRIGIDO para um tom mais suave */
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
 
   --status-success: #4CAF50;
   --status-error: #f44336;
@@ -115,7 +115,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .add-to-cart-button:hover:not(:disabled) {
-  background-color: #2E7D32;
+  background-color: #1b5e20;
 }
 
 .add-to-cart-button:disabled {
