@@ -1,4 +1,4 @@
-// Arquivo: backend/index.js (COMPLETO E CORRIGIDO)
+// Arquivo: backend/index.js (COMPLETO E CORRIGIDO COM MAIS SEGURANÇA)
 
 const express = require('express');
 const cors = require('cors');
@@ -11,6 +11,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const webpush = require('web-push');
+const crypto = require('crypto'); // <--- ADIÇÃO IMPORTANTE
 
 const app = express();
 const server = http.createServer(app);
@@ -25,7 +26,40 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) { webpush.set
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-const checkPassword = (req, res, next) => { const { authorization } = req.headers; if (authorization === process.env.ADMIN_PASSWORD) { next(); } else { res.status(403).send('Acesso negado.'); } };
+// MIDDLEWARE DE SENHA DO ADMIN CORRIGIDO PARA SER MAIS SEGURO
+const checkPassword = (req, res, next) => {
+    try {
+        const { authorization } = req.headers;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (!authorization || !adminPassword) {
+            return res.status(401).send('Acesso não autorizado.');
+        }
+
+        const providedPasswordBuffer = Buffer.from(authorization);
+        const correctPasswordBuffer = Buffer.from(adminPassword);
+
+        // A comparação segura exige que os buffers tenham o mesmo tamanho
+        if (providedPasswordBuffer.length !== correctPasswordBuffer.length) {
+            // Se os tamanhos forem diferentes, não podemos usar timingSafeEqual.
+            // Executamos uma comparação fictícia para garantir que o tempo de resposta seja consistente.
+            crypto.timingSafeEqual(providedPasswordBuffer, providedPasswordBuffer);
+            return res.status(403).send('Acesso negado.');
+        }
+
+        const passwordsMatch = crypto.timingSafeEqual(providedPasswordBuffer, correctPasswordBuffer);
+
+        if (passwordsMatch) {
+            next();
+        } else {
+            res.status(403).send('Acesso negado.');
+        }
+    } catch (error) {
+        console.error('Erro no middleware checkPassword:', error);
+        res.status(500).send('Erro interno do servidor.');
+    }
+};
+
 const verifyToken = (req, res, next) => { const authHeader = req.headers['authorization']; const token = authHeader && authHeader.split(' ')[1]; if (!token) { return res.status(401).json({ message: 'Token não fornecido.' }); } jwt.verify(token, process.env.JWT_SECRET, (err, user) => { if (err) { return res.status(403).json({ message: 'Token inválido.' }); } req.user = user; next(); }); };
 
 
@@ -36,7 +70,6 @@ app.get('/api/banners/ativos', async (req, res) => { try { const result = await 
 app.post('/api/auth/register', async (req, res) => { const { nome, email, senha } = req.body; if (!nome || !email || !senha) return res.status(400).json({ message: 'Preencha tudo.' }); try { const salt = await bcrypt.genSalt(10); const senha_hash = await bcrypt.hash(senha, salt); const newUser = await pool.query('INSERT INTO usuarios (nome, email, senha_hash) VALUES ($1, $2, $3) RETURNING id, nome, email', [nome, email, senha_hash]); res.status(201).json(newUser.rows[0]); } catch (err) { if (err.code === '23505') return res.status(400).json({ message: 'E-mail já cadastrado.' }); res.status(500).json({ message: 'Erro no servidor.' }); }});
 app.post('/api/auth/login', async (req, res) => { const { email, senha } = req.body; if (!email || !senha) return res.status(400).json({ message: 'Preencha tudo.' }); try { const userResult = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]); if (userResult.rows.length === 0) return res.status(401).json({ message: 'Credenciais inválidas.' }); const user = userResult.rows[0]; const isMatch = await bcrypt.compare(senha, user.senha_hash); if (!isMatch) return res.status(401).json({ message: 'Credenciais inválidas.' }); const payload = { id: user.id, nome: user.nome }; const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' }); res.json({ token, user: payload }); } catch (err) { res.status(500).json({ message: 'Erro no servidor.' }); }});
 
-// ROTA DE CRIAÇÃO DE PEDIDO COM TRATAMENTO DE ERRO CORRIGIDO
 app.post('/api/pedidos', async (req, res) => {
     const { nome_cliente, endereco_cliente, itens, metodo_pagamento, troco_para, token, codigo_cupom } = req.body;
     const client = await pool.connect();
@@ -81,8 +114,7 @@ app.post('/api/pedidos', async (req, res) => {
         res.status(201).json({ message: 'Pedido criado com sucesso!', pedidoId: novoPedido.id });
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error('Erro ao criar pedido:', err); // Loga o erro real no servidor para você ver
-        // Envia uma mensagem genérica e segura para o cliente
+        console.error('Erro ao criar pedido:', err);
         res.status(500).json({ message: 'Ocorreu um erro inesperado ao processar seu pedido. Tente novamente.' });
     } finally {
         client.release();
@@ -92,7 +124,6 @@ app.post('/api/pedidos', async (req, res) => {
 app.post('/api/cupons/validar', async (req, res) => { const { codigo } = req.body; if (!codigo) return res.status(400).json({ message: 'Código é obrigatório.' }); try { const result = await pool.query('SELECT * FROM cupons WHERE codigo = $1 AND ativo = true', [codigo.toUpperCase()]); if (result.rows.length === 0) return res.status(404).json({ message: 'Cupom inválido ou inativo.' }); const cupom = result.rows[0]; if (cupom.data_validade && new Date(cupom.data_validade) < new Date()) return res.status(400).json({ message: 'Cupom expirou.' }); if (cupom.usos_maximos != null && cupom.usos_atuais >= cupom.usos_maximos) return res.status(400).json({ message: 'Cupom atingiu limite.' }); res.json({ message: 'Cupom válido!', cupom }); } catch (err) { res.status(500).send('Erro no servidor'); }});
 app.get('/api/vapid-public-key', (req, res) => { res.send(process.env.VAPID_PUBLIC_KEY); });
 
-// ROTA "MEUS PEDIDOS" DO USUÁRIO OTIMIZADA
 app.get('/api/meus-pedidos', verifyToken, async (req, res) => {
     try {
         const pedidosResult = await pool.query('SELECT * FROM pedidos WHERE usuario_id = $1 ORDER BY data_pedido DESC', [req.user.id]);
@@ -137,7 +168,6 @@ app.post('/api/produtos', checkPassword, async (req, res) => { const { nome, pre
 app.put('/api/produtos/:id', checkPassword, async (req, res) => { const { id } = req.params; const { nome, preco, unidade, imagem, categorias } = req.body; const client = await pool.connect(); try { await client.query('BEGIN'); const r = await pool.query('UPDATE produtos SET nome = $1, preco = $2, unidade = $3, imagem = $4 WHERE id = $5 RETURNING *', [nome, preco, unidade, imagem, id]); await client.query('DELETE FROM produto_categoria WHERE produto_id = $1', [id]); if (categorias && categorias.length > 0) { for (const cId of categorias) { await client.query('INSERT INTO produto_categoria (produto_id, categoria_id) VALUES ($1, $2)', [id, cId]); } } await client.query('COMMIT'); res.json(r.rows[0]); } catch (err) { await client.query('ROLLBACK'); res.status(500).send('Erro'); } finally { client.release(); }});
 app.delete('/api/produtos/:id', checkPassword, async (req, res) => { const { id } = req.params; try { await pool.query('DELETE FROM produtos WHERE id = $1', [id]); res.status(204).send(); } catch (e) { res.status(500).send('Error.'); }});
 
-// ROTA DE LISTAGEM DE PEDIDOS DO ADMIN OTIMIZADA
 app.get('/api/pedidos', checkPassword, async (req, res) => {
     try {
         const pedidosResult = await pool.query('SELECT * FROM pedidos ORDER BY data_pedido DESC');
