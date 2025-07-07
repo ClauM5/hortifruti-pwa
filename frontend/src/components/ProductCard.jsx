@@ -1,5 +1,4 @@
 // Arquivo: frontend/src/components/ProductCard.jsx
-
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -12,10 +11,9 @@ function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { user, toggleFavorito } = useAuth();
   
-  // Estado local apenas para o feedback visual temporário
   const [isJustAdded, setIsJustAdded] = useState(false);
 
-  // O estado de favorito agora vem diretamente da prop do produto, que é atualizada pela HomePage
+  // A prop 'is_favorito' agora vem da HomePage e é sempre a mais atualizada
   const isFavorited = product.is_favorito;
 
   const handleAddToCart = () => {
@@ -23,15 +21,7 @@ function ProductCard({ product }) {
     setIsJustAdded(true);
     setTimeout(() => {
       setIsJustAdded(false);
-    }, 1500); // Reseta o feedback visual após 1.5 segundos
-  };
-
-  const handleFavoriteClick = () => {
-    if (!user) {
-        alert('Você precisa estar logado para adicionar aos favoritos.');
-        return;
-    }
-    toggleFavorito(product.id);
+    }, 1500);
   };
 
   return (
@@ -39,11 +29,7 @@ function ProductCard({ product }) {
       <div className="product-image-container">
         <img src={product.imagem || 'https://via.placeholder.com/280x220?text=Sem+Imagem'} alt={product.nome} className="product-image" />
         {user && (
-          <button 
-            onClick={handleFavoriteClick} 
-            className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
-            aria-label="Adicionar aos favoritos"
-          >
+          <button onClick={() => toggleFavorito(product.id)} className={`favorite-button ${isFavorited ? 'favorited' : ''}`} aria-label="Adicionar aos favoritos">
             {isFavorited ? <HeartIconFilled /> : <HeartIconOutlined />}
           </button>
         )}
@@ -54,16 +40,11 @@ function ProductCard({ product }) {
           R$ {Number(product.preco).toFixed(2).replace('.', ',')}
           <span className="product-unit"> / {product.unidade}</span>
         </p>
-        <button 
-          onClick={handleAddToCart} 
-          className={`add-to-cart-button ${isJustAdded ? 'just-added' : ''}`}
-          disabled={isJustAdded} // Desabilita apenas durante o feedback visual
-        >
+        <button onClick={handleAddToCart} className={`add-to-cart-button ${isJustAdded ? 'just-added' : ''}`} disabled={isJustAdded}>
           {isJustAdded ? 'Adicionado ✓' : 'Adicionar ao Carrinho'}
         </button>
       </div>
     </div>
   );
 }
-
 export default ProductCard;

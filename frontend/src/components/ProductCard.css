@@ -1,37 +1,133 @@
 /* Arquivo: frontend/src/components/ProductCard.css */
 
-/* ... (A maior parte do CSS continua a mesma) ... */
-.product-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); overflow: hidden; transition: all 0.2s ease-in-out; display: flex; flex-direction: column; position: relative; }
-.product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
-.product-image-container { position: relative; width: 100%; padding-top: 75%; overflow: hidden; background-color: #f5f5f5; }
-.product-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-.product-card:hover .product-image { transform: scale(1.05); }
-.card-content { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-.product-name { font-size: 1.1rem; margin: 0 0 8px 0; flex-grow: 1; line-height: 1.4; font-weight: 600; }
-.product-price { font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; color: var(--text-color-dark); margin: 0 0 15px 0; }
-.product-unit { font-size: 0.9rem; font-weight: 400; color: var(--text-color-light); }
-.add-to-cart-button { background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); padding: 14px; cursor: pointer; font-family: var(--font-headings); font-size: 1rem; font-weight: 600; width: 100%; transition: all 0.2s ease; }
-.add-to-cart-button:hover:not(:disabled) { background-color: var(--primary-color-light); transform: scale(1.02); }
-.add-to-cart-button:disabled { cursor: not-allowed; }
-/* ESTILOS CORRIGIDOS PARA O BOTÃO DE FAVORITO */
-.favorite-button { position: absolute; top: 12px; right: 12px; background: transparent; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; z-index: 5; padding: 0; }
-.favorite-button:hover { transform: scale(1.15); }
-.favorite-button svg { stroke: var(--favorite-color); /* Usa a nova cor vermelha para o contorno */ fill: none; }
-.favorite-button.favorited svg { stroke: var(--favorite-color); fill: var(--favorite-color); }
+.product-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-/* >> NOVOS ESTILOS DE ESTADO << */
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.product-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* Proporção 4:3 para a imagem */
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.product-name {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  flex-grow: 1;
+  line-height: 1.4;
+}
+
+.product-price {
+  font-family: var(--font-body);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-color-dark);
+  margin: 0 0 15px 0;
+}
+
+.product-unit {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-color-light);
+}
+
+.add-to-cart-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 14px;
+  cursor: pointer;
+  font-family: var(--font-headings);
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.add-to-cart-button:hover:not(:disabled) {
+  background-color: var(--primary-color-light);
+  transform: scale(1.02);
+}
+
+.add-to-cart-button:disabled {
+  cursor: not-allowed;
+}
+
 .add-to-cart-button.just-added {
     background-color: var(--status-success);
     color: white;
     opacity: 1;
 }
-.add-to-cart-button.in-cart {
-    background-color: #e0e0e0;
-    color: var(--text-color-light);
-    opacity: 1;
+
+/* Estilos Corrigidos para o Botão de Favorito */
+.favorite-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  padding: 0;
 }
 
-.favorite-button { position: absolute; top: 12px; right: 12px; background: transparent; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; z-index: 5; padding: 0; }
-.favorite-button:hover { transform: scale(1.15); }
-.favorite-button svg { stroke: var(--accent-color); fill: none; }
-.favorite-button.favorited svg { stroke: var(--accent-color); fill: var(--accent-color); }
+.favorite-button:hover {
+  transform: scale(1.15);
+}
+
+.favorite-button svg {
+  stroke: var(--favorite-color); /* Usa a cor vermelha para o contorno */
+  fill: rgba(255, 255, 255, 0.5); /* Fundo um pouco branco para contraste */
+  transition: all 0.2s ease;
+}
+
+.favorite-button.favorited svg {
+  stroke: var(--favorite-color);
+  fill: var(--favorite-color); /* Preenche com vermelho quando favoritado */
+}

@@ -1,6 +1,6 @@
 // Arquivo: frontend/src/pages/HomePage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ProductCard from '../components/ProductCard';
 import BannerCarousel from '../components/BannerCarousel';
 import './HomePage.css';
@@ -15,30 +15,28 @@ function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Puxa o token e a lista de favoritos do contexto de autenticação
   const { token, favoritos } = useAuth();
 
-  const fetchProdutos = useCallback(async () => {
-    setIsLoading(true);
-    let url = new URL(`${API_BASE_URL}/produtos`);
-    if (searchTerm) {
-      url.searchParams.append('search', searchTerm);
-    }
-    if (selectedCategory !== 'Todos') {
-      url.searchParams.append('categoria', selectedCategory);
-    }
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      setIsLoading(true);
+      let url = new URL(`${API_BASE_URL}/produtos`);
+      if (searchTerm) url.searchParams.append('search', searchTerm);
+      if (selectedCategory !== 'Todos') url.searchParams.append('categoria', selectedCategory);
 
-    try {
-      const response = await fetch(url, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      const data = await response.json();
-      setProdutos(data);
-    } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      try {
+        const response = await fetch(url, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        const data = await response.json();
+        setProdutos(data);
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProdutos();
   }, [searchTerm, selectedCategory, token]);
 
   useEffect(() => {
@@ -52,18 +50,12 @@ function HomePage() {
     fetchCategorias();
   }, []);
 
-  // Este useEffect agora também depende da lista de 'favoritos'.
-  // Se a lista de favoritos mudar, ele vai buscar os produtos novamente.
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-        fetchProdutos();
-    }, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [fetchProdutos, favoritos]);
-
-
-  // A lógica de filtragem agora é feita no backend, então aqui só exibimos os produtos recebidos.
-  const filteredProducts = produtos; 
+  const produtosComFavoritos = useMemo(() => {
+    return produtos.map(produto => ({
+      ...produto,
+      is_favorito: favoritos.has(produto.id)
+    }));
+  }, [produtos, favoritos]);
 
   return (
     <>
@@ -73,11 +65,7 @@ function HomePage() {
           <h4>Categorias</h4>
           <ul>
             {categorias.map(cat => (
-              <li
-                key={cat.id}
-                className={selectedCategory === cat.nome ? 'active' : ''}
-                onClick={() => setSelectedCategory(cat.nome)}
-              >
+              <li key={cat.id} className={selectedCategory === cat.nome ? 'active' : ''} onClick={() => setSelectedCategory(cat.nome)}>
                 {cat.nome}
               </li>
             ))}
@@ -85,21 +73,14 @@ function HomePage() {
         </aside>
         <main className="product-area">
           <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Buscar por nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <input type="text" placeholder="Buscar por nome..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             {(searchTerm || selectedCategory !== 'Todos') && <button onClick={() => { setSearchTerm(''); setSelectedCategory('Todos'); }} className="clear-button">Limpar Filtros</button>}
           </div>
-          {isLoading ? (
-            <p>Carregando produtos...</p>
-          ) : (
+          {isLoading ? <p>Carregando produtos...</p> : (
             <div className="product-grid">
-              {filteredProducts.length > 0 ? filteredProducts.map(product => (
+              {produtosComFavoritos.map(product => (
                 <ProductCard key={product.id} product={product} />
-              )) : <p>Nenhum produto encontrado.</p>}
+              ))}
             </div>
           )}
         </main>

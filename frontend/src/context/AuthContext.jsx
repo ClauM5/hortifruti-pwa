@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/context/AuthContext.jsx (Com Fetch Inteligente)
+// Arquivo: frontend/src/context/AuthContext.jsx
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,11 +20,9 @@ export function AuthProvider({ children }) {
     setToken(null);
     setUser(null);
     setFavoritos(new Set());
-    // Redireciona para a home após o logout para evitar ficar em páginas protegidas
-    navigate('/'); 
+    navigate('/');
   }, [navigate]);
 
-  // >> O FETCH INTELIGENTE <<
   const fetchWithAuth = useCallback(async (url, options = {}) => {
     const currentToken = localStorage.getItem('token');
     const headers = {
@@ -38,7 +36,6 @@ export function AuthProvider({ children }) {
 
     const response = await fetch(url, { ...options, headers });
 
-    // Se o erro for de autorização (token expirado/inválido), desloga o usuário
     if (response.status === 401 || response.status === 403) {
       logout();
       throw new Error('Sua sessão expirou. Por favor, faça o login novamente.');
@@ -84,20 +81,45 @@ export function AuthProvider({ children }) {
     setToken(data.token);
   };
   
-  const register = async (nome, email, senha) => { /* ... sem alterações ... */ };
+  const register = async (nome, email, senha) => {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, senha }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      return data;
+  };
 
   const toggleFavorito = useCallback(async (produtoId) => {
-    const isFavorito = favoritos.has(produtoId);
-    // ... (lógica otimista continua a mesma) ...
+    const isCurrentlyFavorito = favoritos.has(produtoId);
+    
+    // Atualiza a UI primeiro, de forma otimista
+    const newFavoritos = new Set(favoritos);
+    if (isCurrentlyFavorito) {
+      newFavoritos.delete(produtoId);
+    } else {
+      newFavoritos.add(produtoId);
+    }
+    setFavoritos(newFavoritos);
+
+    // Depois, envia a requisição para o backend
     try {
-      await fetchWithAuth(`${API_BASE_URL}/favoritos${isFavorito ? `/${produtoId}` : ''}`, {
-        method: isFavorito ? 'DELETE' : 'POST',
-        body: isFavorito ? null : JSON.stringify({ produtoId }),
+      const response = await fetchWithAuth(`${API_BASE_URL}/favoritos${isCurrentlyFavorito ? `/${produtoId}` : ''}`, {
+        method: isCurrentlyFavorito ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: isCurrentlyFavorito ? null : JSON.stringify({ produtoId }),
       });
+
+      if (!response.ok) {
+        // Se a API falhar, desfaz a alteração na UI
+        console.error('Falha na API, revertendo estado do favorito.');
+        setFavoritos(favoritos); 
+      }
     } catch (error) {
-      console.error('Falha ao atualizar favorito:', error);
-      // Reverte o estado em caso de erro
-      fetchFavoritos();
+      console.error('Falha de rede ao atualizar favorito:', error);
+      setFavoritos(favoritos);
     }
   }, [favoritos, fetchWithAuth]);
 
