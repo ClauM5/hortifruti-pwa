@@ -14,7 +14,8 @@ function AdminProdutos() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
-  const adminToken = '102030';
+  // CORREÇÃO: A senha agora é lida da sessão do navegador.
+  const adminToken = sessionStorage.getItem('admin_password');
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);

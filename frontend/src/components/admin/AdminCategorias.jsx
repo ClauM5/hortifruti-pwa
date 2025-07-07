@@ -11,7 +11,8 @@ function AdminCategorias() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const adminToken = '102030'; // Senha do admin
+  // CORREÇÃO: A senha agora é lida da sessão do navegador.
+  const adminToken = sessionStorage.getItem('admin_password');
 
   const fetchCategorias = useCallback(async () => {
     setIsLoading(true);

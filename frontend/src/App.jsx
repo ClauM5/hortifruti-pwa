@@ -1,4 +1,4 @@
-// Arquivo: frontend/src/App.jsx (Versão Final, Verificada e Corrigida)
+// Arquivo: frontend/src/App.jsx
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -36,8 +36,9 @@ import AdminCupons from './components/admin/AdminCupons';
 
 // Componente "Guardião" para proteger as rotas do admin
 const ProtectedAdminRoute = ({ children }) => {
-  const isAdminLoggedIn = sessionStorage.getItem('admin_password');
-  return isAdminLoggedIn === '102030' ? children : <Navigate to="/admin/login" replace />;
+  // CORREÇÃO: Apenas verifica se a chave existe, não o valor.
+  const isAdminLoggedIn = sessionStorage.getItem('admin_password'); 
+  return isAdminLoggedIn ? children : <Navigate to="/admin/login" replace />;
 };
 
 function App() {
