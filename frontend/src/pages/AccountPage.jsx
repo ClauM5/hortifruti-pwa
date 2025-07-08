@@ -1,12 +1,14 @@
-// Arquivo: frontend/src/pages/AccountPage.jsx (Com Polling Reativado)
+// Arquivo: frontend/src/pages/AccountPage.jsx (COMPLETO E OTIMIZADO)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { subscribeUserToPush } from '../utils/push-notifications';
 import './AuthPages.css';
 
 const API_BASE_URL = 'https://hortifruti-backend.onrender.com/api';
+const WS_URL = 'wss://hortifruti-backend.onrender.com'; // URL do WebSocket
 
 function AccountPage() {
   const { user, token, logout, fetchWithAuth } = useAuth();
@@ -16,13 +18,11 @@ function AccountPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchPedidos = useCallback(async (isInitialLoad = false) => {
+  // Busca os pedidos uma única vez ao carregar a página
+  const fetchPedidos = useCallback(async () => {
     if (!token) return;
-
-    // Só mostra o "Carregando..." na primeira vez
-    if (isInitialLoad) setIsLoading(true);
+    setIsLoading(true);
     setError('');
-    
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/meus-pedidos`);
       if (!response.ok) throw new Error('Falha ao buscar seus pedidos.');
@@ -33,25 +33,51 @@ function AccountPage() {
         setError(err.message);
       }
     } finally {
-      // Só para de carregar na primeira vez
-      if (isInitialLoad) setIsLoading(false);
+      setIsLoading(false);
     }
   }, [token, fetchWithAuth]);
-
-  // Efeito que roda uma vez para buscar os dados iniciais E configurar o polling
+  
   useEffect(() => {
-    fetchPedidos(true); // True indica que é a carga inicial
+    fetchPedidos();
+  }, [fetchPedidos]);
 
-    const intervalId = setInterval(() => {
-      fetchPedidos(false); // False indica que é uma atualização em segundo plano
-    }, 15000); // A cada 15 segundos
 
-    // Limpa o intervalo quando o usuário sai da página
-    return () => clearInterval(intervalId);
-  }, [token, fetchPedidos]); // Depende apenas do token e da função de busca
+  // Efeito para conectar ao WebSocket e receber atualizações em tempo real
+  useEffect(() => {
+    if (!token) return;
+
+    const ws = new WebSocket(`${WS_URL}?token=${token}`);
+
+    ws.onopen = () => {
+      console.log('Conectado ao WebSocket na página da conta.');
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'STATUS_UPDATE') {
+        const { pedidoId, novoStatus } = message.payload;
+        // Atualiza o status do pedido específico na lista, sem precisar recarregar tudo
+        setPedidos(prevPedidos =>
+          prevPedidos.map(p =>
+            p.id === pedidoId ? { ...p, status: novoStatus } : p
+          )
+        );
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('Desconectado do WebSocket na página da conta.');
+    };
+
+    // Limpa a conexão ao sair da página para evitar memory leaks
+    return () => {
+      ws.close();
+    };
+  }, [token]);
 
 
   const handleLogout = () => { logout(); };
+
   const handleReorder = (itensDoPedido) => {
     fetch(`${API_BASE_URL}/produtos`).then(res => res.json()).then(allProducts => {
       itensDoPedido.forEach(item => {
@@ -60,6 +86,14 @@ function AccountPage() {
       });
       navigate('/checkout');
     });
+  };
+
+  const handleEnableNotifications = async () => {
+    if (!token) {
+        alert("Você precisa estar logado para ativar as notificações.");
+        return;
+    }
+    await subscribeUserToPush(token);
   };
 
   if (isLoading) {
@@ -74,6 +108,11 @@ function AccountPage() {
       <div className="account-page">
         <div className="account-header"><h2>Minha Conta</h2><button onClick={handleLogout} className="logout-button">Sair</button></div>
         <p>Olá, <strong>{user.nome}!</strong></p>
+        
+        <button onClick={handleEnableNotifications} className="notification-button">
+          Ativar Notificações de Pedidos
+        </button>
+        
         <div className="account-links">
           <Link to="/meus-favoritos" className="account-link-box">Meus Favoritos</Link>
           <Link to="/meus-enderecos" className="account-link-box">Meus Endereços</Link>
@@ -88,7 +127,7 @@ function AccountPage() {
                   <span>Pedido #{pedido.id} - {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
                   <span className={`status status-${pedido.status.toLowerCase().replace(/\s+/g, '-')}`}>{pedido.status}</span>
                 </div>
-                <div className="order-summary-body"><p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace('.',',')}</p></div>
+                <div className="order-summary-body"><p><strong>Total:</strong> R$ {Number(pedido.valor_total).toFixed(2).replace(',', '.')}</p></div>
                 <div className="order-summary-actions">
                   <button onClick={() => navigate(`/pedido/${pedido.id}`)} className="details-button">Ver Detalhes</button>
                   <button onClick={(e) => { e.preventDefault(); handleReorder(pedido.itens); }} className="reorder-button">Pedir Novamente</button>
@@ -101,4 +140,5 @@ function AccountPage() {
     </div>
   );
 }
+
 export default AccountPage;

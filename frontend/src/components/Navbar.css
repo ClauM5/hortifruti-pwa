@@ -75,3 +75,23 @@
         font-size: 1rem;
     }
 }
+
+/* Adicionar no final do arquivo frontend/src/components/Navbar.css */
+
+.install-button {
+  background-color: var(--accent-color);
+  color: var(--text-color-dark);
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-right: 1rem;
+}
+
+.install-button:hover {
+  background-color: var(--accent-color-hover);
+  transform: scale(1.05);
+}
